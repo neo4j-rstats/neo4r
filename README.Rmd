@@ -143,7 +143,7 @@ Results can also be returned in JSON:
   call_api(con, output = "json")
 ```
 
-If you turn the `type` argument to `graph`, you'll get a graph result: 
+If you turn the `type` argument to `"graph"`, you'll get a graph result: 
 
 ```{r}
 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
@@ -168,7 +168,7 @@ Please, note that this function will return `NA` for the properties that aren't 
 
 On the long run, and this is not `{neo4r}` specific by Neo4J related, a good practice is to point out a "name" property on each node, so this column will be full here.
 
-You can also either unnest only the properties or the labels : 
+Also, it is possible to unnest either the properties or the labels : 
 
 ```{r}
 res$nodes %>%
@@ -182,7 +182,7 @@ res$nodes %>%
 
 + `unnest_relationships`
 
-There is only one nested column in the relationship table, so the function is quite straightforward : 
+There is only one nested column in the relationship table, thus the function is quite straightforward : 
 
 ```{r}
 unnest_relationships(res$relationships)
@@ -198,15 +198,15 @@ unnest_graph(res)
 
 ## Convert for common graph packages
 
-Unless otherwise specified, the functions does an `unnest_graph` before being transformed to a graph object.
+Unless otherwise specified, the function carries out an `unnest_graph` before being transformed into a graph object.
 
 ### {igraph}
 
-To be converted to a graph object, 
+In order to be converted into a graph object, 
 
-+ the nodes need an id, and a name. By defaut, the node name is assumed to be found in the "name" property return by the graph, but you can specify any other column. The "label" column from Neo4J is renamed "group".
++ nodes need an id, and a name. By default, node name is assumed to be found in the "name" property returned by the graph, specifying any other column is allowed. The "label" column from Neo4J is renamed "group".
 
-+ relationships needs a start and end, which are startNode and endNode in the Neo4J results. 
++ relationships need a start and an end, *i.e.* startNode and endNode in the Neo4J results. 
 
 ```{r}
 res %>%
@@ -222,7 +222,7 @@ Which means that you can :
   plot()
 ```
 
-This can also be used with ggraph :
+This can also be used with `{ggraph}` :
 
 ```{r}
 library(ggraph)
@@ -245,7 +245,7 @@ visNetwork::visNetwork(network$nodes, network$relationships)
 ```
 
 
-## Sending data to the api 
+## Sending data to the API 
 
 You can simply send queries has we have just seen, by writing the cypher query and call the api.  
 
