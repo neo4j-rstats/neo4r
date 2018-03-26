@@ -43,6 +43,7 @@ read_cypher <- function(file){
 #' @examples
 #' \dontrun{
 #' send_cypher("random/create.cypher")
+#' path <- "data-raw/constraints.cypher"
 #' }
 
 send_cypher <- function(path, con, type = c("row","graph"), output = c("r", "json"),

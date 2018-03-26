@@ -81,46 +81,34 @@ con$get_version()
 #> [1] "3.3.3"
 # List constaints (if any)
 con$get_constraints()
-#> # A tibble: 6 x 3
+#> # A tibble: 3 x 3
 #>   label      type       property_keys
 #>   <chr>      <chr>      <chr>        
-#> 1 setosa     UNIQUENESS Species      
-#> 2 Maintainer UNIQUENESS name         
-#> 3 Package    UNIQUENESS name         
-#> 4 Author     UNIQUENESS name         
-#> 5 artist     UNIQUENESS name         
-#> 6 album      UNIQUENESS name
+#> 1 Maintainer UNIQUENESS name         
+#> 2 Author     UNIQUENESS name         
+#> 3 Package    UNIQUENESS name
 # Get a vector of labels (if any)
 con$get_labels()
-#> # A tibble: 6 x 1
+#> # A tibble: 3 x 1
 #>   labels    
 #>   <chr>     
 #> 1 Maintainer
-#> 2 Author    
-#> 3 artist    
-#> 4 album     
-#> 5 Package   
-#> 6 setosa
+#> 2 Package   
+#> 3 Author
 # Get a vector of relationships (if any)
 con$get_relationships()
-#> # A tibble: 4 x 1
+#> # A tibble: 1 x 1
 #>   relationships
 #>   <chr>        
-#> 1 MAINTAINS    
-#> 2 DEPENDS_ON   
-#> 3 IMPORTS      
-#> 4 has_recorded
+#> 1 MAINTAINS
 # Get schema 
 con$get_schema()
-#> # A tibble: 6 x 2
+#> # A tibble: 3 x 2
 #>   label      property_keys
 #>   <chr>      <chr>        
 #> 1 Package    name         
-#> 2 album      name         
-#> 3 setosa     Species      
-#> 4 Author     name         
-#> 5 artist     name         
-#> 6 Maintainer name
+#> 2 Author     name         
+#> 3 Maintainer name
 ```
 
 ## Call the API
@@ -157,13 +145,13 @@ library(magrittr)
   call_api(con)
 #> $nom
 #> # A tibble: 5 x 1
-#>   value   
-#>   <chr>   
-#> 1 A3      
-#> 2 abbyyR  
-#> 3 abc     
-#> 4 abc.data
-#> 5 ABC.RAP
+#>   value      
+#>   <chr>      
+#> 1 A3         
+#> 2 abbyyR     
+#> 3 abc        
+#> 4 ABCanalysis
+#> 5 abc.data
 ```
 
 By default, results are returned as an R list of tibbles. We choose to
@@ -175,27 +163,27 @@ in the form of two tibbles (p.name and dep.name
 here):
 
 ``` r
-'MATCH (p:Package) <-[:DEPENDS_ON]-(dep:Package) RETURN p.name AS nom, dep.name AS maintainer LIMIT 5' %>%
+'MATCH (p:Package) <-[:MAINTAINS]-(main:Maintainer) RETURN p.name AS nom, main.name AS maintainer LIMIT 5' %>%
   call_api(con)
 #> $nom
 #> # A tibble: 5 x 1
-#>   value
-#>   <chr>
-#> 1 abind
-#> 2 abind
-#> 3 abind
-#> 4 abind
-#> 5 ade4 
+#>   value     
+#>   <chr>     
+#> 1 A3        
+#> 2 abbyyR    
+#> 3 abc.data  
+#> 4 abc       
+#> 5 AdaptGauss
 #> 
 #> $maintainer
 #> # A tibble: 5 x 1
-#>   value   
-#>   <chr>   
-#> 1 multipol
-#> 2 Bagidis 
-#> 3 multipol
-#> 4 Bagidis 
-#> 5 subniche
+#>   value             
+#>   <chr>             
+#> 1 scott fortmann-roe
+#> 2 gaurav sood       
+#> 3 blum michael      
+#> 4 blum michael      
+#> 5 florian lerch
 ```
 
 The result is a two elements list with each element being labelled as
@@ -205,14 +193,54 @@ Results can also be returned in
 JSON:
 
 ``` r
-'MATCH (p:Package) <-[:DEPENDS_ON]-(dep:Package) RETURN p.name AS nom, dep.name AS maintainer LIMIT 1' %>%
+'MATCH (p:Package) <-[:MAINTAINS]-(main:Maintainer) RETURN p.name AS nom, main.name AS maintainer LIMIT 5' %>%
   call_api(con, output = "json")
 #> [
 #>   [
 #>     {
 #>       "row": [
-#>         ["abind"],
-#>         ["multipol"]
+#>         ["A3"],
+#>         ["scott fortmann-roe"]
+#>       ],
+#>       "meta": [
+#>         {},
+#>         {}
+#>       ]
+#>     },
+#>     {
+#>       "row": [
+#>         ["abbyyR"],
+#>         ["gaurav sood"]
+#>       ],
+#>       "meta": [
+#>         {},
+#>         {}
+#>       ]
+#>     },
+#>     {
+#>       "row": [
+#>         ["abc.data"],
+#>         ["blum michael"]
+#>       ],
+#>       "meta": [
+#>         {},
+#>         {}
+#>       ]
+#>     },
+#>     {
+#>       "row": [
+#>         ["abc"],
+#>         ["blum michael"]
+#>       ],
+#>       "meta": [
+#>         {},
+#>         {}
+#>       ]
+#>     },
+#>     {
+#>       "row": [
+#>         ["AdaptGauss"],
+#>         ["florian lerch"]
 #>       ],
 #>       "meta": [
 #>         {},
@@ -229,7 +257,7 @@ If you turn the `type` argument to `graph`, you’ll get a graph result:
 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
   call_api(con, type = "graph")
 #> $nodes
-#> # A tibble: 6 x 3
+#> # A tibble: 9 x 3
 #>   id    label     properties
 #>   <chr> <list>    <list>    
 #> 1 0     <chr [1]> <list [5]>
@@ -238,16 +266,19 @@ If you turn the `type` argument to `graph`, you’ll get a graph result:
 #> 4 3     <chr [1]> <list [1]>
 #> 5 4     <chr [1]> <list [5]>
 #> 6 5     <chr [1]> <list [1]>
+#> 7 6     <chr [1]> <list [5]>
+#> 8 7     <chr [1]> <list [1]>
+#> 9 8     <chr [1]> <list [5]>
 #> 
 #> $relationships
 #> # A tibble: 5 x 5
 #>   id    type      startNode endNode properties
 #>   <chr> <chr>     <chr>     <chr>   <list>    
-#> 1 16713 MAINTAINS 1         0       <list [0]>
-#> 2 0     MAINTAINS 1         0       <list [0]>
-#> 3 16714 MAINTAINS 3         2       <list [0]>
-#> 4 1     MAINTAINS 3         2       <list [0]>
-#> 5 16715 MAINTAINS 5         4       <list [0]>
+#> 1 0     MAINTAINS 1         0       <list [0]>
+#> 2 1     MAINTAINS 3         2       <list [0]>
+#> 3 2     MAINTAINS 5         4       <list [0]>
+#> 4 3     MAINTAINS 7         6       <list [0]>
+#> 5 4     MAINTAINS 5         8       <list [0]>
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -269,7 +300,7 @@ We have designed several functions to unnest this :
 res <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
   call_api(con, type = "graph")
 unnest_nodes(res$nodes)
-#> # A tibble: 6 x 7
+#> # A tibble: 9 x 7
 #>   id    label      date       license            name   title      version
 #>   <chr> <chr>      <chr>      <chr>              <chr>  <chr>      <chr>  
 #> 1 0     Package    2015-08-15 GPL (>= 2)         A3     "Accurate… 1.0.0  
@@ -277,7 +308,10 @@ unnest_nodes(res$nodes)
 #> 3 2     Package    NA         MIT + file LICENSE abbyyR Access to… 0.5.1  
 #> 4 3     Maintainer <NA>       <NA>               gaura… <NA>       <NA>   
 #> 5 4     Package    2015-05-04 GPL (>= 3)         abc    Tools for… 2.1    
-#> 6 5     Maintainer <NA>       <NA>               blum … <NA>       <NA>
+#> 6 5     Maintainer <NA>       <NA>               blum … <NA>       <NA>   
+#> 7 6     Package    2017-03-13 GPL-3              ABCan… Computed … 1.2.1  
+#> 8 7     Maintainer <NA>       <NA>               flori… <NA>       <NA>   
+#> 9 8     Package    2015-05-04 GPL (>= 3)         abc.d… Data Only… 1.0
 ```
 
 Note that this will return NA for the properties not in a node. For
@@ -293,7 +327,7 @@ You can also either unnest only the properties or the labels :
 ``` r
 res$nodes %>%
   unnest_nodes(what = "properties")
-#> # A tibble: 6 x 7
+#> # A tibble: 9 x 7
 #>   id    label     date       license            name    title      version
 #>   <chr> <list>    <chr>      <chr>              <chr>   <chr>      <chr>  
 #> 1 0     <chr [1]> 2015-08-15 GPL (>= 2)         A3      "Accurate… 1.0.0  
@@ -301,13 +335,16 @@ res$nodes %>%
 #> 3 2     <chr [1]> NA         MIT + file LICENSE abbyyR  Access to… 0.5.1  
 #> 4 3     <chr [1]> <NA>       <NA>               gaurav… <NA>       <NA>   
 #> 5 4     <chr [1]> 2015-05-04 GPL (>= 3)         abc     Tools for… 2.1    
-#> 6 5     <chr [1]> <NA>       <NA>               blum m… <NA>       <NA>
+#> 6 5     <chr [1]> <NA>       <NA>               blum m… <NA>       <NA>   
+#> 7 6     <chr [1]> 2017-03-13 GPL-3              ABCana… Computed … 1.2.1  
+#> 8 7     <chr [1]> <NA>       <NA>               floria… <NA>       <NA>   
+#> 9 8     <chr [1]> 2015-05-04 GPL (>= 3)         abc.da… Data Only… 1.0
 ```
 
 ``` r
 res$nodes %>%
   unnest_nodes(what = "label")
-#> # A tibble: 6 x 3
+#> # A tibble: 9 x 3
 #>   id    properties label     
 #>   <chr> <list>     <chr>     
 #> 1 0     <list [5]> Package   
@@ -316,6 +353,9 @@ res$nodes %>%
 #> 4 3     <list [1]> Maintainer
 #> 5 4     <list [5]> Package   
 #> 6 5     <list [1]> Maintainer
+#> 7 6     <list [5]> Package   
+#> 8 7     <list [1]> Maintainer
+#> 9 8     <list [5]> Package
 ```
 
   - `unnest_relationships`
@@ -328,11 +368,11 @@ unnest_relationships(res$relationships)
 #> # A tibble: 5 x 5
 #>   id    type      startNode endNode properties
 #>   <chr> <chr>     <chr>     <chr>   <chr>     
-#> 1 16713 MAINTAINS 1         0       <NA>      
-#> 2 0     MAINTAINS 1         0       <NA>      
-#> 3 16714 MAINTAINS 3         2       <NA>      
-#> 4 1     MAINTAINS 3         2       <NA>      
-#> 5 16715 MAINTAINS 5         4       <NA>
+#> 1 0     MAINTAINS 1         0       <NA>      
+#> 2 1     MAINTAINS 3         2       <NA>      
+#> 3 2     MAINTAINS 5         4       <NA>      
+#> 4 3     MAINTAINS 7         6       <NA>      
+#> 5 4     MAINTAINS 5         8       <NA>
 ```
 
   - `unnest_graph`
@@ -343,7 +383,7 @@ This function takes a graph results, and does `unnest_nodes` and
 ``` r
 unnest_graph(res)
 #> $nodes
-#> # A tibble: 6 x 7
+#> # A tibble: 9 x 7
 #>   id    label      date       license            name   title      version
 #>   <chr> <chr>      <chr>      <chr>              <chr>  <chr>      <chr>  
 #> 1 0     Package    2015-08-15 GPL (>= 2)         A3     "Accurate… 1.0.0  
@@ -352,16 +392,19 @@ unnest_graph(res)
 #> 4 3     Maintainer <NA>       <NA>               gaura… <NA>       <NA>   
 #> 5 4     Package    2015-05-04 GPL (>= 3)         abc    Tools for… 2.1    
 #> 6 5     Maintainer <NA>       <NA>               blum … <NA>       <NA>   
+#> 7 6     Package    2017-03-13 GPL-3              ABCan… Computed … 1.2.1  
+#> 8 7     Maintainer <NA>       <NA>               flori… <NA>       <NA>   
+#> 9 8     Package    2015-05-04 GPL (>= 3)         abc.d… Data Only… 1.0    
 #> 
 #> $relationships
 #> # A tibble: 5 x 5
 #>   id    type      startNode endNode properties
 #>   <chr> <chr>     <chr>     <chr>   <chr>     
-#> 1 16713 MAINTAINS 1         0       <NA>      
-#> 2 0     MAINTAINS 1         0       <NA>      
-#> 3 16714 MAINTAINS 3         2       <NA>      
-#> 4 1     MAINTAINS 3         2       <NA>      
-#> 5 16715 MAINTAINS 5         4       <NA>      
+#> 1 0     MAINTAINS 1         0       <NA>      
+#> 2 1     MAINTAINS 3         2       <NA>      
+#> 3 2     MAINTAINS 5         4       <NA>      
+#> 4 3     MAINTAINS 7         6       <NA>      
+#> 5 4     MAINTAINS 5         8       <NA>      
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -389,13 +432,13 @@ To be converted to a graph object,
 ``` r
 res %>%
   convert_to("igraph")
-#> IGRAPH bae9668 DN-- 6 5 -- 
+#> IGRAPH 0088b29 DN-- 9 5 -- 
 #> + attr: name (v/c), group (v/c), date (v/c), license (v/c), title
 #> | (v/c), version (v/c), type (e/c), id (e/c), properties (e/x)
-#> + edges from bae9668 (vertex names):
-#> [1] scott fortmann-roe->A3     scott fortmann-roe->A3    
-#> [3] gaurav sood       ->abbyyR gaurav sood       ->abbyyR
-#> [5] blum michael      ->abc
+#> + edges from 0088b29 (vertex names):
+#> [1] scott fortmann-roe->A3          gaurav sood       ->abbyyR     
+#> [3] blum michael      ->abc         florian lerch     ->ABCanalysis
+#> [5] blum michael      ->abc.data
 ```
 
 Which means that you can :
@@ -442,39 +485,9 @@ query and call the api.
 
 ### Sending an R data.frame
 
-  - `as_nodes` turns a dataframe into a series of nodes
-:
+  - `as_nodes` turns a dataframe into a series of nodes :
 
-<!-- end list -->
-
-``` r
-call_api("CREATE CONSTRAINT ON (a:setosa) ASSERT a.Species IS UNIQUE;", con)
-#> list()
-library(dplyr)
-iris %>%
-  filter(Species == "setosa") %>%
-   as_nodes(label = Species) %>%
-   call_api(con, include_stats = TRUE)
-#> $error_code
-#> [1] "Neo.ClientError.Schema.ConstraintValidationFailed"
-#> 
-#> $error_message
-#> [1] "Node(19217) already exists with label `setosa` and property `Species` = '1'"
-```
-
-``` r
-'MATCH (n:setosa) RETURN COUNT(*) AS setosa' %>%
-   call_api(con)
-#> $setosa
-#> # A tibble: 1 x 1
-#>   value
-#>   <int>
-#> 1     0
-```
-
-For now, big dataframes can result in API crash if you try to send too
-much data. We are working on it, so for now you should split you
-data.frame into pieces (imagine it as doing a `USING PERIODIC COMMIT`).
+// Coming soon
 
   - `as_relationships`
 
@@ -512,59 +525,6 @@ read_cypher("data-raw/create.cypher")
 
 ``` r
 send_cypher("data-raw/constraints.cypher", con)
-#> No data returned.
-#> No data returned.
-#> No data returned.
-#> [[1]]
-#> # A tibble: 12 x 2
-#>    type                  value
-#>    <chr>                 <dbl>
-#>  1 contains_updates         0.
-#>  2 nodes_created            0.
-#>  3 nodes_deleted            0.
-#>  4 properties_set           0.
-#>  5 relationships_created    0.
-#>  6 relationship_deleted     0.
-#>  7 labels_added             0.
-#>  8 labels_removed           0.
-#>  9 indexes_added            0.
-#> 10 indexes_removed          0.
-#> 11 constraints_added        0.
-#> 12 constraints_removed      0.
-#> 
-#> [[2]]
-#> # A tibble: 12 x 2
-#>    type                  value
-#>    <chr>                 <dbl>
-#>  1 contains_updates         0.
-#>  2 nodes_created            0.
-#>  3 nodes_deleted            0.
-#>  4 properties_set           0.
-#>  5 relationships_created    0.
-#>  6 relationship_deleted     0.
-#>  7 labels_added             0.
-#>  8 labels_removed           0.
-#>  9 indexes_added            0.
-#> 10 indexes_removed          0.
-#> 11 constraints_added        0.
-#> 12 constraints_removed      0.
-#> 
-#> [[3]]
-#> # A tibble: 12 x 2
-#>    type                  value
-#>    <chr>                 <dbl>
-#>  1 contains_updates         0.
-#>  2 nodes_created            0.
-#>  3 nodes_deleted            0.
-#>  4 properties_set           0.
-#>  5 relationships_created    0.
-#>  6 relationship_deleted     0.
-#>  7 labels_added             0.
-#>  8 labels_removed           0.
-#>  9 indexes_added            0.
-#> 10 indexes_removed          0.
-#> 11 constraints_added        0.
-#> 12 constraints_removed      0.
 ```
 
 ### Sending csv dataframe to Neo4J
@@ -574,37 +534,33 @@ browser.
 
 The args are :
 
-  - on\_load : the code to execute on load
-  - con : the connexion object
-  - url : the url of the csv to send
-  - header : wether or not the csv has a header
-  - periodic\_commit : the volume for PERIODIC COMMIT
-  - as : the AS argument for LOAD CSV
-  - format : the format of the result
-  - include\_stats : whether or not to include the stats
-  - meta : whether or not to return the meta information
+  - `on_load` : the code to execute on load
+  - `con` : the connexion object
+  - `url` : the url of the csv to send
+  - `header` : wether or not the csv has a header
+  - `periodic_commit` : the volume for PERIODIC COMMIT
+  - `as` : the AS argument for LOAD CSV
+  - `format` : the format of the result
+  - `include_stats` : whether or not to include the stats
+  - `meta` : whether or not to return the meta information
 
 <!-- end list -->
 
 ``` r
 # Create the constraints
 call_api("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
-#> No data returned.
-#> list()
 call_api("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
-#> No data returned.
-#> list()
+```
+
+``` r
 # List constaints (if any)
 con$get_constraints()
-#> # A tibble: 6 x 3
+#> # A tibble: 3 x 3
 #>   label      type       property_keys
 #>   <chr>      <chr>      <chr>        
-#> 1 setosa     UNIQUENESS Species      
-#> 2 Maintainer UNIQUENESS name         
-#> 3 Package    UNIQUENESS name         
-#> 4 Author     UNIQUENESS name         
-#> 5 artist     UNIQUENESS name         
-#> 6 album      UNIQUENESS name
+#> 1 Maintainer UNIQUENESS name         
+#> 2 Author     UNIQUENESS name         
+#> 3 Package    UNIQUENESS name
 # Create the query that will create the nodes and relationships
 on_load_query <- 'MERGE (a:artist { name: csvLine.artist})
 MERGE (al:album {name: csvLine.album_name})
@@ -650,13 +606,13 @@ load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tr
 #> # A tibble: 12 x 2
 #>    type                  value
 #>    <chr>                 <dbl>
-#>  1 contains_updates         0.
-#>  2 nodes_created            0.
+#>  1 contains_updates         1.
+#>  2 nodes_created         1975.
 #>  3 nodes_deleted            0.
-#>  4 properties_set           0.
-#>  5 relationships_created    0.
+#>  4 properties_set        1975.
+#>  5 relationships_created 1183.
 #>  6 relationship_deleted     0.
-#>  7 labels_added             0.
+#>  7 labels_added          1975.
 #>  8 labels_removed           0.
 #>  9 indexes_added            0.
 #> 10 indexes_removed          0.

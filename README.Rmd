@@ -12,15 +12,14 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-con_name <- as.numeric(Sys.time() + 1)
-system(glue::glue("docker run --publish=7474:7474 --publish=7687:7687 --env NEO4J_AUTH=neo4j/pouetpouet --name {con_name} neo4j4test"), wait = FALSE)
+# con_name <- as.numeric(Sys.time() + 1)
+# system(glue::glue("docker run --publish=7474:7474 --publish=7687:7687 --env NEO4J_AUTH=neo4j/pouetpouet --name {con_name} neo4j4test"), wait = FALSE)
 con <- neo4r::neo4j_api$new(url = "http://localhost:7474",
                             user = "neo4j", password = "pouetpouet")
 while(con$ping() != 200) {
   Sys.sleep(1)
 }
 library(neo4r)
-con <- neo4j_api$new(url = "http://localhost:7474", user = "neo4j", password = "pouetpouet")
 send_cypher("data-raw/constraints.cypher", con, include_stats = TRUE)
 
 
@@ -29,20 +28,6 @@ LOAD CSV WITH HEADERS FROM "file:///pkg.csv" AS csv
 MERGE (p:Package {name: csv.Package, version: csv.Version, license: csv.License, date: csv.Date, title: csv.Title})
 MERGE (m:Maintainer {name: csv.Maintainer})
 CREATE (m) -[:MAINTAINS]-> (p);' %>%
-  call_api(con, include_stats = TRUE)
-
-'USING PERIODIC COMMIT 500
-LOAD CSV WITH HEADERS FROM "file:///depends.csv" AS csv 
-MATCH (p:Package {name : csv.Package})
-MATCH (l:Package {name: csv.Depends})
-CREATE (p) -[:DEPENDS_ON]-> (l);' %>%
-  call_api(con, include_stats = TRUE)
-
-'USING PERIODIC COMMIT 500
-LOAD CSV WITH HEADERS FROM "file:///imports.csv" AS csv 
-MATCH (p:Package {name : csv.Package, version: csv.Version})
-MATCH (l:Package {name: csv.Depends})
-CREATE (p) -[:IMPORTS]-> (l);' %>%
   call_api(con, include_stats = TRUE)
 
 ```
@@ -145,7 +130,7 @@ By default, results are returned as an R list of tibbles. We choose to implement
 For example, when you want to return two nodes, you'll get two results, in the form of two tibbles (p.name and dep.name here): 
 
 ```{r}
-'MATCH (p:Package) <-[:DEPENDS_ON]-(dep:Package) RETURN p.name AS nom, dep.name AS maintainer LIMIT 5' %>%
+'MATCH (p:Package) <-[:MAINTAINS]-(main:Maintainer) RETURN p.name AS nom, main.name AS maintainer LIMIT 5' %>%
   call_api(con)
 ```
 
@@ -154,7 +139,7 @@ The result is a two elements list with each element being labelled as what you s
 Results can also be returned in JSON:
 
 ```{r}
-'MATCH (p:Package) <-[:DEPENDS_ON]-(dep:Package) RETURN p.name AS nom, dep.name AS maintainer LIMIT 1' %>%
+'MATCH (p:Package) <-[:MAINTAINS]-(main:Maintainer) RETURN p.name AS nom, main.name AS maintainer LIMIT 5' %>%
   call_api(con, output = "json")
 ```
 
@@ -268,21 +253,7 @@ You can simply send queries has we have just seen, by writing the cypher query a
 
 + `as_nodes` turns a dataframe into a series of nodes : 
 
-```{r message = FALSE}
-call_api("CREATE CONSTRAINT ON (a:setosa) ASSERT a.Species IS UNIQUE;", con)
-library(dplyr)
-iris %>%
-  filter(Species == "setosa") %>%
-   as_nodes(label = Species) %>%
-   call_api(con, include_stats = TRUE)
-```
-
-```{r}
-'MATCH (n:setosa) RETURN COUNT(*) AS setosa' %>%
-   call_api(con)
-```
-
-For now, big dataframes can result in API crash if you try to send too much data. We are working on it, so for now you should split you data.frame into pieces (imagine it as doing a `USING PERIODIC COMMIT`).
+// Coming soon
 
 + `as_relationships`
 
@@ -298,7 +269,7 @@ read_cypher("data-raw/create.cypher")
 
 + `send_cypher` reads a cypher file, and send it the the API. By default, the stats are returned. 
 
-```{r}
+```{r eval = FALSE}
 send_cypher("data-raw/constraints.cypher", con)
 ```
 
@@ -309,20 +280,23 @@ The `load_csv_with_headers` sends an csv from an url to the Neo4J browser.
 
 The args are : 
 
-+ on_load : the code to execute on load 
-+ con : the connexion object 
-+ url : the url of the csv to send
-+ header : wether or not the csv has a header
-+ periodic_commit : the volume for PERIODIC COMMIT
-+ as : the AS argument for LOAD CSV
-+ format : the format of the result 
-+ include_stats : whether or not to include the stats 
-+ meta : whether or not to return the meta information
++ `on_load` : the code to execute on load 
++ `con` : the connexion object 
++ `url` : the url of the csv to send
++ `header` : wether or not the csv has a header
++ `periodic_commit` : the volume for PERIODIC COMMIT
++ `as` : the AS argument for LOAD CSV
++ `format` : the format of the result 
++ `include_stats` : whether or not to include the stats 
++ `meta` : whether or not to return the meta information
 
-```{r}
+```{r eval = FALSE}
 # Create the constraints
 call_api("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
 call_api("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
+```
+
+```{r}
 # List constaints (if any)
 con$get_constraints()
 # Create the query that will create the nodes and relationships
@@ -341,6 +315,6 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 By participating in this project you agree to abide by its terms.
 
 ```{r include = FALSE}
-system(glue::glue("docker stop {con_name}"))
+# system(glue::glue("docker stop {con_name}"))
 ```
 

@@ -22,7 +22,7 @@ row_to_cypher_with_var <- function(vec, label, variable){
 #'
 #' @export
 
-as_nodes <- function(tbl, label, ...){
+as_nodes <- function(tbl, label, type = c("CREATE", "MERGE"), ...){
   selection <- quos(...)
   label <- tbl[[deparse(substitute(label))]]
   if (!is_empty(selection)){
@@ -30,8 +30,7 @@ as_nodes <- function(tbl, label, ...){
   }
   index <- 1:nrow(tbl)
   map_chr(index, ~ row_to_cypher(tbl[.x, , drop = FALSE], label[.x])) %>%
-    paste(collapse = ", ") %>%
-    paste("CREATE ", ., collapse = " ")
+    paste(type, ., collapse = "; ")
 }
 
 
