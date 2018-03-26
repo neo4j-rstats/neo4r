@@ -95,12 +95,12 @@ con$get_labels()
 #> # A tibble: 6 x 1
 #>   labels    
 #>   <chr>     
-#> 1 album     
-#> 2 setosa    
-#> 3 Author    
-#> 4 Package   
-#> 5 Maintainer
-#> 6 artist
+#> 1 Maintainer
+#> 2 Author    
+#> 3 artist    
+#> 4 album     
+#> 5 Package   
+#> 6 setosa
 # Get a vector of relationships (if any)
 con$get_relationships()
 #> # A tibble: 4 x 1
@@ -389,10 +389,10 @@ To be converted to a graph object,
 ``` r
 res %>%
   convert_to("igraph")
-#> IGRAPH de89ff9 DN-- 6 5 -- 
+#> IGRAPH bae9668 DN-- 6 5 -- 
 #> + attr: name (v/c), group (v/c), date (v/c), license (v/c), title
 #> | (v/c), version (v/c), type (e/c), id (e/c), properties (e/x)
-#> + edges from de89ff9 (vertex names):
+#> + edges from bae9668 (vertex names):
 #> [1] scott fortmann-roe->A3     scott fortmann-roe->A3    
 #> [3] gaurav sood       ->abbyyR gaurav sood       ->abbyyR
 #> [5] blum michael      ->abc
@@ -435,16 +435,6 @@ network <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 10' %>%
 visNetwork::visNetwork(network$nodes, network$relationships)
 ```
 
-<!--html_preserve-->
-
-<div id="htmlwidget-e2cd3c576a1f5679188e" class="visNetwork html-widget" style="width:100%;height:480px;">
-
-</div>
-
-<script type="application/json" data-for="htmlwidget-e2cd3c576a1f5679188e">{"x":{"nodes":{"id":["0","1","2","3","4","5","6","7","8"],"group":["Package","Maintainer","Package","Maintainer","Package","Maintainer","Package","Package","Maintainer"],"date":["2015-08-15",null,"NA",null,"2015-05-04",null,"2015-05-04","NA",null],"license":["GPL (>= 2)",null,"MIT + file LICENSE",null,"GPL (>= 3)",null,"GPL (>= 3)","GPL-3",null],"label":["A3","scott fortmann-roe","abbyyR","gaurav sood","abc","blum michael","abc.data","ABC.RAP","abdulmonem alsaleh"],"title":["Accurate, Adaptable, and Accessible Error Metrics for Predictive\nModels",null,"Access to Abbyy Optical Character Recognition (OCR) API",null,"Tools for Approximate Bayesian Computation (ABC)",null,"Data Only: Tools for Approximate Bayesian Computation (ABC)","Array Based CpG Region Analysis Pipeline",null],"version":["1.0.0",null,"0.5.1",null,"2.1",null,"1.0","0.9.0",null]},"edges":{"id":["16713","0","16714","1","16715","2","16716","3","16717","4"],"type":["MAINTAINS","MAINTAINS","MAINTAINS","MAINTAINS","MAINTAINS","MAINTAINS","MAINTAINS","MAINTAINS","MAINTAINS","MAINTAINS"],"from":["1","1","3","3","5","5","5","5","8","8"],"to":["0","0","2","2","4","4","6","6","7","7"],"properties":[null,null,null,null,null,null,null,null,null,null]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false}},"groups":["Package","Maintainer"],"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script>
-
-<!--/html_preserve-->
-
 ## Sending data to the api
 
 You can simply send queries has we have just seen, by writing the cypher
@@ -469,7 +459,7 @@ iris %>%
 #> [1] "Neo.ClientError.Schema.ConstraintValidationFailed"
 #> 
 #> $error_message
-#> [1] "Node(19215) already exists with label `setosa` and property `Species` = '1'"
+#> [1] "Node(19217) already exists with label `setosa` and property `Species` = '1'"
 ```
 
 ``` r

@@ -252,7 +252,7 @@ library(ggraph)
 
 ### {visNetwork}
 
-```{r}
+```{r eval = FALSE}
 network <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 10' %>%
   call_api(con, type = "graph") %>% 
   convert_to("visNetwork")
