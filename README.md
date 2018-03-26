@@ -318,7 +318,7 @@ Note that this will return NA for the properties not in a node. For
 example here, we have no ‘licence’ information for the Maintainer node
 (that makes sense).
 
-On the long run, and this is not {neo4r} specific by Neo4J related, a
+On the long run, and this is not {neo4r} specific but Neo4J related, a
 good practice is to have a “name” propertie on each node, so this column
 will be full here.
 
