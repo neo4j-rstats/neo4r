@@ -15,12 +15,12 @@
 The goal of {neo4r} is to provide a modern and flexible Neo4J driver for
 R.
 
-It’s modern in the sense that you results are returned as tibbles
-whenever possible, relies on modern tools, and is designed to work with
-the pipe. Our goal with this package is to provide a driver that can be
-easily integrated in a data analysis workflow, especially by providing
-an API that can work smoothly with other data analysis (dplyr or purrr)
-and graph packages (igraph, ggraph, visNetwork…).
+It’s modern in the sense that the results are returned as tibbles
+whenever possible, it relies on modern tools, and it is designed to work
+with pipes. Our goal is to provide a driver that can be easily
+integrated in a data analysis workflow, especially by providing an API
+working smoothly with other data analysis (`{dplyr}` or `{purrr}`) and
+graph packages (`{igraph}`, `{ggraph}`, `{visNetwork}`…).
 
 It’s flexible in the sense that it is rather unopinionated regarding the
 way it returns the results, by trying to stay as close as possible to
@@ -51,7 +51,7 @@ con <- neo4j_api$new(url = "http://localhost:7474",
                      user = "plop", password = "pouetpouet")
 ```
 
-This connexion object is designed to interact with you Neo4J API.
+This connexion object is designed to interact with the Neo4J API.
 
 It comes with some methods to retrieve information from it :
 
@@ -72,8 +72,8 @@ con$ping()
 con$password <- "pouetpouet"
 ```
 
-That means you can at any time connect to another url without having to
-generate a new connexion object. (`con$reset_url()`).
+That means you can connect to another url at any time without having to
+create a new connexion object. (`con$reset_url()`).
 
 ``` r
 # Get Neo4J Version
@@ -89,18 +89,21 @@ con$get_constraints()
 #> 3 Package    UNIQUENESS name
 # Get a vector of labels (if any)
 con$get_labels()
-#> # A tibble: 3 x 1
+#> # A tibble: 5 x 1
 #>   labels    
 #>   <chr>     
-#> 1 Maintainer
-#> 2 Package   
-#> 3 Author
+#> 1 album     
+#> 2 Author    
+#> 3 Maintainer
+#> 4 artist    
+#> 5 Package
 # Get a vector of relationships (if any)
 con$get_relationships()
-#> # A tibble: 1 x 1
+#> # A tibble: 2 x 1
 #>   relationships
 #>   <chr>        
-#> 1 MAINTAINS
+#> 1 MAINTAINS    
+#> 2 has_recorded
 # Get schema 
 con$get_schema()
 #> # A tibble: 3 x 2
@@ -116,26 +119,27 @@ con$get_schema()
 You can either create a separate query or insert it inside the
 `call_api` function.
 
-The `call_api` function takes several arguments :
+The `call_api()` function takes several arguments :
 
-  - query : the cypher query
-  - con : the connexion object
-  - type : “rows” or “graph”: wether to return the results as a list of
-    results in tibble, or as a graph object (with `$nodes` and
+  - `query` : the cypher query
+  - `con` : the connexion object
+  - `type` : “rows” or “graph”: wether to return the results as a list
+    of results in tibble, or as a graph object (with `$nodes` and
     `$relationships`)
-  - output : the output format (r or json)
-  - include\_stats : whether or not to include the stats about the call
-  - meta : wether or not to include the meta arguments of the nodes when
-    calling with “rows”
+  - `output` : the output format (R or json)
+  - `include_stats` : whether or not to include the stats about the call
+  - `meta` : wether or not to include the meta arguments of the nodes
+    when calling with “rows”
 
-> At the end of the developping process of all the packages planned, you
-> will be able to write your queries and pipe them with {cyphersugar},
-> which offers a syntactic sugar on top of cypher.
+> It will be possible to write queries and pipe them with
+> `{cyphersugar}` at the end of the developping process of all the
+> planned packages. `{cyphersugar}` will offer a *syntactic sugar* on
+> top of Cypher.
 
 ### “rows” format
 
-When you’re calling the API, you can choose to returns a list of
-tibbles. You get as many objects as you specified in the RETURN cypher
+The user chooses wether or not to return a list of tibbles when calling
+the API. You get as many objects as specified in the RETURN cypher
 statement.
 
 ``` r
@@ -154,9 +158,9 @@ library(magrittr)
 #> 5 abc.data
 ```
 
-By default, results are returned as an R list of tibbles. We choose to
-implement it this way, as we think this is the more “truthful” regarding
-the way you call Neo4J.
+By default, results are returned as an R list of tibbles. We think this
+is the more “truthful” way to implement the outputs regarding Neo4J
+calls.
 
 For example, when you want to return two nodes, you’ll get two results,
 in the form of two tibbles (p.name and dep.name
@@ -167,27 +171,27 @@ here):
   call_api(con)
 #> $nom
 #> # A tibble: 5 x 1
-#>   value     
-#>   <chr>     
-#> 1 A3        
-#> 2 abbyyR    
-#> 3 abc.data  
-#> 4 abc       
-#> 5 AdaptGauss
+#>   value   
+#>   <chr>   
+#> 1 A3      
+#> 2 A3      
+#> 3 abbyyR  
+#> 4 abbyyR  
+#> 5 abc.data
 #> 
 #> $maintainer
 #> # A tibble: 5 x 1
 #>   value             
 #>   <chr>             
 #> 1 scott fortmann-roe
-#> 2 gaurav sood       
-#> 3 blum michael      
-#> 4 blum michael      
-#> 5 florian lerch
+#> 2 scott fortmann-roe
+#> 3 gaurav sood       
+#> 4 gaurav sood       
+#> 5 blum michael
 ```
 
-The result is a two elements list with each element being labelled as
-what you specified in the cypher query.
+The result is a two elements list with each element being labelled the
+way it has been specified in the Cypher query.
 
 Results can also be returned in
 JSON:
@@ -201,6 +205,26 @@ JSON:
 #>       "row": [
 #>         ["A3"],
 #>         ["scott fortmann-roe"]
+#>       ],
+#>       "meta": [
+#>         {},
+#>         {}
+#>       ]
+#>     },
+#>     {
+#>       "row": [
+#>         ["A3"],
+#>         ["scott fortmann-roe"]
+#>       ],
+#>       "meta": [
+#>         {},
+#>         {}
+#>       ]
+#>     },
+#>     {
+#>       "row": [
+#>         ["abbyyR"],
+#>         ["gaurav sood"]
 #>       ],
 #>       "meta": [
 #>         {},
@@ -226,38 +250,18 @@ JSON:
 #>         {},
 #>         {}
 #>       ]
-#>     },
-#>     {
-#>       "row": [
-#>         ["abc"],
-#>         ["blum michael"]
-#>       ],
-#>       "meta": [
-#>         {},
-#>         {}
-#>       ]
-#>     },
-#>     {
-#>       "row": [
-#>         ["AdaptGauss"],
-#>         ["florian lerch"]
-#>       ],
-#>       "meta": [
-#>         {},
-#>         {}
-#>       ]
 #>     }
 #>   ]
 #> ]
 ```
 
-If you turn the `type` argument to `graph`, you’ll get a graph result:
+If you turn the `type` argument to `"graph"`, you’ll get a graph result:
 
 ``` r
 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
   call_api(con, type = "graph")
 #> $nodes
-#> # A tibble: 9 x 3
+#> # A tibble: 6 x 3
 #>   id    label     properties
 #>   <chr> <list>    <list>    
 #> 1 0     <chr [1]> <list [5]>
@@ -266,19 +270,16 @@ If you turn the `type` argument to `graph`, you’ll get a graph result:
 #> 4 3     <chr [1]> <list [1]>
 #> 5 4     <chr [1]> <list [5]>
 #> 6 5     <chr [1]> <list [1]>
-#> 7 6     <chr [1]> <list [5]>
-#> 8 7     <chr [1]> <list [1]>
-#> 9 8     <chr [1]> <list [5]>
 #> 
 #> $relationships
 #> # A tibble: 5 x 5
 #>   id    type      startNode endNode properties
 #>   <chr> <chr>     <chr>     <chr>   <list>    
-#> 1 0     MAINTAINS 1         0       <list [0]>
-#> 2 1     MAINTAINS 3         2       <list [0]>
-#> 3 2     MAINTAINS 5         4       <list [0]>
-#> 4 3     MAINTAINS 7         6       <list [0]>
-#> 5 4     MAINTAINS 5         8       <list [0]>
+#> 1 1320  MAINTAINS 1         0       <list [0]>
+#> 2 0     MAINTAINS 1         0       <list [0]>
+#> 3 1321  MAINTAINS 3         2       <list [0]>
+#> 4 1     MAINTAINS 3         2       <list [0]>
+#> 5 1322  MAINTAINS 5         4       <list [0]>
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -287,10 +288,10 @@ If you turn the `type` argument to `graph`, you’ll get a graph result:
 The result is returned as one node or relationship by row.
 
 Due to the specific data format of Neo4J, there can be more than one
-label and propertie by node and relationship. That’s why the results is
-returned, by design, as a list-data.frame.
+label and property by node and relationship. That’s why the results is
+returned, by design, as a list-dataframe.
 
-We have designed several functions to unnest this :
+We have designed several functions to unnest the output :
 
   - #### unnest\_nodes, that can unnest a node dataframe :
 
@@ -300,7 +301,7 @@ We have designed several functions to unnest this :
 res <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
   call_api(con, type = "graph")
 unnest_nodes(res$nodes)
-#> # A tibble: 9 x 7
+#> # A tibble: 6 x 7
 #>   id    label      date       license            name   title      version
 #>   <chr> <chr>      <chr>      <chr>              <chr>  <chr>      <chr>  
 #> 1 0     Package    2015-08-15 GPL (>= 2)         A3     "Accurate… 1.0.0  
@@ -308,26 +309,26 @@ unnest_nodes(res$nodes)
 #> 3 2     Package    NA         MIT + file LICENSE abbyyR Access to… 0.5.1  
 #> 4 3     Maintainer <NA>       <NA>               gaura… <NA>       <NA>   
 #> 5 4     Package    2015-05-04 GPL (>= 3)         abc    Tools for… 2.1    
-#> 6 5     Maintainer <NA>       <NA>               blum … <NA>       <NA>   
-#> 7 6     Package    2017-03-13 GPL-3              ABCan… Computed … 1.2.1  
-#> 8 7     Maintainer <NA>       <NA>               flori… <NA>       <NA>   
-#> 9 8     Package    2015-05-04 GPL (>= 3)         abc.d… Data Only… 1.0
+#> 6 5     Maintainer <NA>       <NA>               blum … <NA>       <NA>
 ```
 
-Note that this will return NA for the properties not in a node. For
-example here, we have no ‘licence’ information for the Maintainer node
-(that makes sense).
+Please, note that this function will return `NA` for the properties that
+aren’t in a node. For example here, we have no ‘licence’ information for
+the Maintainer node (that makes sense).
 
-On the long run, and this is not {neo4r} specific but Neo4J related, a
-good practice is to have a “name” propertie on each node, so this column
-will be full here.
+\<\<\<\<\<\<\< HEAD On the long run, and this is not {neo4r} specific
+but Neo4J related, a good practice is to have a “name” propertie on each
+node, so this column will be full here. ======= On the long run, and
+this is not `{neo4r}` specific by Neo4J related, a good practice is to
+point out a “name” property on each node, so this column will be full
+here. \>\>\>\>\>\>\> 063e7f2e732a5f214a8e552bb1ce0729a5396f1a
 
-You can also either unnest only the properties or the labels :
+Also, it is possible to unnest either the properties or the labels :
 
 ``` r
 res$nodes %>%
   unnest_nodes(what = "properties")
-#> # A tibble: 9 x 7
+#> # A tibble: 6 x 7
 #>   id    label     date       license            name    title      version
 #>   <chr> <list>    <chr>      <chr>              <chr>   <chr>      <chr>  
 #> 1 0     <chr [1]> 2015-08-15 GPL (>= 2)         A3      "Accurate… 1.0.0  
@@ -335,16 +336,13 @@ res$nodes %>%
 #> 3 2     <chr [1]> NA         MIT + file LICENSE abbyyR  Access to… 0.5.1  
 #> 4 3     <chr [1]> <NA>       <NA>               gaurav… <NA>       <NA>   
 #> 5 4     <chr [1]> 2015-05-04 GPL (>= 3)         abc     Tools for… 2.1    
-#> 6 5     <chr [1]> <NA>       <NA>               blum m… <NA>       <NA>   
-#> 7 6     <chr [1]> 2017-03-13 GPL-3              ABCana… Computed … 1.2.1  
-#> 8 7     <chr [1]> <NA>       <NA>               floria… <NA>       <NA>   
-#> 9 8     <chr [1]> 2015-05-04 GPL (>= 3)         abc.da… Data Only… 1.0
+#> 6 5     <chr [1]> <NA>       <NA>               blum m… <NA>       <NA>
 ```
 
 ``` r
 res$nodes %>%
   unnest_nodes(what = "label")
-#> # A tibble: 9 x 3
+#> # A tibble: 6 x 3
 #>   id    properties label     
 #>   <chr> <list>     <chr>     
 #> 1 0     <list [5]> Package   
@@ -353,14 +351,11 @@ res$nodes %>%
 #> 4 3     <list [1]> Maintainer
 #> 5 4     <list [5]> Package   
 #> 6 5     <list [1]> Maintainer
-#> 7 6     <list [5]> Package   
-#> 8 7     <list [1]> Maintainer
-#> 9 8     <list [5]> Package
 ```
 
   - `unnest_relationships`
 
-There is only one nested column in the relationship table, so the
+There is only one nested column in the relationship table, thus the
 function is quite straightforward :
 
 ``` r
@@ -368,11 +363,11 @@ unnest_relationships(res$relationships)
 #> # A tibble: 5 x 5
 #>   id    type      startNode endNode properties
 #>   <chr> <chr>     <chr>     <chr>   <chr>     
-#> 1 0     MAINTAINS 1         0       <NA>      
-#> 2 1     MAINTAINS 3         2       <NA>      
-#> 3 2     MAINTAINS 5         4       <NA>      
-#> 4 3     MAINTAINS 7         6       <NA>      
-#> 5 4     MAINTAINS 5         8       <NA>
+#> 1 1320  MAINTAINS 1         0       <NA>      
+#> 2 0     MAINTAINS 1         0       <NA>      
+#> 3 1321  MAINTAINS 3         2       <NA>      
+#> 4 1     MAINTAINS 3         2       <NA>      
+#> 5 1322  MAINTAINS 5         4       <NA>
 ```
 
   - `unnest_graph`
@@ -383,7 +378,7 @@ This function takes a graph results, and does `unnest_nodes` and
 ``` r
 unnest_graph(res)
 #> $nodes
-#> # A tibble: 9 x 7
+#> # A tibble: 6 x 7
 #>   id    label      date       license            name   title      version
 #>   <chr> <chr>      <chr>      <chr>              <chr>  <chr>      <chr>  
 #> 1 0     Package    2015-08-15 GPL (>= 2)         A3     "Accurate… 1.0.0  
@@ -392,19 +387,16 @@ unnest_graph(res)
 #> 4 3     Maintainer <NA>       <NA>               gaura… <NA>       <NA>   
 #> 5 4     Package    2015-05-04 GPL (>= 3)         abc    Tools for… 2.1    
 #> 6 5     Maintainer <NA>       <NA>               blum … <NA>       <NA>   
-#> 7 6     Package    2017-03-13 GPL-3              ABCan… Computed … 1.2.1  
-#> 8 7     Maintainer <NA>       <NA>               flori… <NA>       <NA>   
-#> 9 8     Package    2015-05-04 GPL (>= 3)         abc.d… Data Only… 1.0    
 #> 
 #> $relationships
 #> # A tibble: 5 x 5
 #>   id    type      startNode endNode properties
 #>   <chr> <chr>     <chr>     <chr>   <chr>     
-#> 1 0     MAINTAINS 1         0       <NA>      
-#> 2 1     MAINTAINS 3         2       <NA>      
-#> 3 2     MAINTAINS 5         4       <NA>      
-#> 4 3     MAINTAINS 7         6       <NA>      
-#> 5 4     MAINTAINS 5         8       <NA>      
+#> 1 1320  MAINTAINS 1         0       <NA>      
+#> 2 0     MAINTAINS 1         0       <NA>      
+#> 3 1321  MAINTAINS 3         2       <NA>      
+#> 4 1     MAINTAINS 3         2       <NA>      
+#> 5 1322  MAINTAINS 5         4       <NA>      
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -412,19 +404,19 @@ unnest_graph(res)
 
 ## Convert for common graph packages
 
-Unless otherwise specified, the functions do an `unnest_graph` before
-being transformed to a graph object.
+Unless otherwise specified, the function carries out an `unnest_graph`
+before being transformed into a graph object.
 
 ### {igraph}
 
-To be converted to a graph object,
+In order to be converted into a graph object,
 
-  - the nodes need an id, and a name. By defaut, the node name is
-    assumed to be found in the “name” property return by the graph, but
-    you can specify any other column. The “label” column from Neo4J is
-    renamed “group”.
+  - nodes need an id, and a name. By default, node name is assumed to be
+    found in the “name” property returned by the graph, specifying any
+    other column is allowed. The “label” column from Neo4J is renamed
+    “group”.
 
-  - relationships needs a start and end, which are startNode and endNode
+  - relationships need a start and an end, *i.e.* startNode and endNode
     in the Neo4J results.
 
 <!-- end list -->
@@ -432,13 +424,13 @@ To be converted to a graph object,
 ``` r
 res %>%
   convert_to("igraph")
-#> IGRAPH 0088b29 DN-- 9 5 -- 
+#> IGRAPH adc1501 DN-- 6 5 -- 
 #> + attr: name (v/c), group (v/c), date (v/c), license (v/c), title
 #> | (v/c), version (v/c), type (e/c), id (e/c), properties (e/x)
-#> + edges from 0088b29 (vertex names):
-#> [1] scott fortmann-roe->A3          gaurav sood       ->abbyyR     
-#> [3] blum michael      ->abc         florian lerch     ->ABCanalysis
-#> [5] blum michael      ->abc.data
+#> + edges from adc1501 (vertex names):
+#> [1] scott fortmann-roe->A3     scott fortmann-roe->A3    
+#> [3] gaurav sood       ->abbyyR gaurav sood       ->abbyyR
+#> [5] blum michael      ->abc
 ```
 
 Which means that you can :
@@ -452,7 +444,7 @@ Which means that you can :
 
 <img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
 
-This can also be used with ggraph :
+This can also be used with `{ggraph}` :
 
 ``` r
 library(ggraph)
@@ -478,7 +470,7 @@ network <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 10' %>%
 visNetwork::visNetwork(network$nodes, network$relationships)
 ```
 
-## Sending data to the api
+## Sending data to the API
 
 You can simply send queries has we have just seen, by writing the cypher
 query and call the api.
@@ -606,13 +598,13 @@ load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tr
 #> # A tibble: 12 x 2
 #>    type                  value
 #>    <chr>                 <dbl>
-#>  1 contains_updates         1.
-#>  2 nodes_created         1975.
+#>  1 contains_updates         0.
+#>  2 nodes_created            0.
 #>  3 nodes_deleted            0.
-#>  4 properties_set        1975.
-#>  5 relationships_created 1183.
+#>  4 properties_set           0.
+#>  5 relationships_created    0.
 #>  6 relationship_deleted     0.
-#>  7 labels_added          1975.
+#>  7 labels_added             0.
 #>  8 labels_removed           0.
 #>  9 indexes_added            0.
 #> 10 indexes_removed          0.

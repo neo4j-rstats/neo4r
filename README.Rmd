@@ -41,7 +41,7 @@ CREATE (m) -[:MAINTAINS]-> (p);' %>%
 
 The goal of {neo4r} is to provide a modern and flexible Neo4J driver for R.
 
-It's modern in the sense that you results are returned as tibbles whenever possible, relies on modern tools, and is designed to work with the pipe. Our goal with this package is to provide a driver that can be easily integrated in a data analysis workflow, especially by providing an API that can work smoothly with other data analysis (dplyr or purrr) and graph packages (igraph, ggraph, visNetwork...).
+It's modern in the sense that the results are returned as tibbles whenever possible, it relies on modern tools, and it is designed to work with pipes. Our goal is to provide a driver that can be easily integrated in a data analysis workflow, especially by providing an API working smoothly with other data analysis (`{dplyr}` or `{purrr}`) and graph packages (`{igraph}`, `{ggraph}`, `{visNetwork}`...).
 
 It's flexible in the sense that it is rather unopinionated regarding the way it returns the results, by trying to stay as close as possible to the way Neo4J returns data. That way, you have the control over the way you will compute the results. At the same time, the result is not too complex, so that the "heavy lifting" of data wrangling is not left to the user. 
 
@@ -66,7 +66,7 @@ con <- neo4j_api$new(url = "http://localhost:7474",
                      user = "plop", password = "pouetpouet")
 ```
 
-This connexion object is designed to interact with you Neo4J API. 
+This connexion object is designed to interact with the Neo4J API. 
 
 It comes with some methods to retrieve information from it : 
 
@@ -84,7 +84,7 @@ con$ping()
 con$password <- "pouetpouet"
 ```
 
-That means you can at any time connect to another url without having to generate a new connexion object. (`con$reset_url()`).
+That means you can connect to another url at any time without having to create a new connexion object. (`con$reset_url()`).
 
 ```{r}
 # Get Neo4J Version
@@ -103,20 +103,20 @@ con$get_schema()
 
 You can either create a separate query or insert it inside the `call_api` function. 
 
-The `call_api` function takes several arguments : 
+The `call_api()` function takes several arguments : 
 
-+ query : the cypher query
-+ con : the connexion object 
-+ type : "rows" or "graph": wether to return the results as a list of results in tibble, or as a graph object (with `$nodes` and `$relationships`)
-+ output : the output format (r or json) 
-+ include_stats : whether or not to include the stats about the call 
-+ meta : wether or not to include the meta arguments of the nodes when calling with "rows"
++ `query` : the cypher query
++ `con` : the connexion object 
++ `type` : "rows" or "graph": wether to return the results as a list of results in tibble, or as a graph object (with `$nodes` and `$relationships`)
++ `output` : the output format (R or json) 
++ `include_stats` : whether or not to include the stats about the call 
++ `meta` : wether or not to include the meta arguments of the nodes when calling with "rows"
 
-> At the end of the developping process of all the packages planned, you will be able to write your queries and pipe them with {cyphersugar}, which offers a syntactic sugar on top of cypher.
+> It will be possible to write queries and pipe them with `{cyphersugar}` at the end of the developping process of all the planned packages. `{cyphersugar}` will offer a *syntactic sugar* on top of Cypher.
 
 ### "rows" format
 
-When you're calling the API, you can choose to returns a list of tibbles. You get as many objects as you specified in the RETURN cypher statement. 
+The user chooses wether or not to return a list of tibbles when calling the API. You get as many objects as specified in the RETURN cypher statement. 
 
 ```{r}
 library(magrittr)
@@ -125,7 +125,7 @@ library(magrittr)
   call_api(con)
 ```
 
-By default, results are returned as an R list of tibbles. We choose to implement it this way, as we think this is the more "truthful" regarding the way you call Neo4J. 
+By default, results are returned as an R list of tibbles. We think this is the more "truthful" way to implement the outputs regarding Neo4J calls. 
 
 For example, when you want to return two nodes, you'll get two results, in the form of two tibbles (p.name and dep.name here): 
 
@@ -134,7 +134,7 @@ For example, when you want to return two nodes, you'll get two results, in the f
   call_api(con)
 ```
 
-The result is a two elements list with each element being labelled as what you specified in the cypher query. 
+The result is a two elements list with each element being labelled the way it has been specified in the Cypher query. 
 
 Results can also be returned in JSON:
 
@@ -143,7 +143,7 @@ Results can also be returned in JSON:
   call_api(con, output = "json")
 ```
 
-If you turn the `type` argument to `graph`, you'll get a graph result: 
+If you turn the `type` argument to `"graph"`, you'll get a graph result: 
 
 ```{r}
 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
@@ -152,9 +152,9 @@ If you turn the `type` argument to `graph`, you'll get a graph result:
 
 The result is returned as one node or relationship by row. 
 
-Due to the specific data format of Neo4J, there can be more than one label and propertie by node and relationship. That's why the results is returned, by design, as a list-data.frame. 
+Due to the specific data format of Neo4J, there can be more than one label and property by node and relationship. That's why the results is returned, by design, as a list-dataframe. 
 
-We have designed several functions to unnest this : 
+We have designed several functions to unnest the output : 
 
 + #### unnest_nodes, that can unnest a node dataframe : 
 
@@ -164,11 +164,15 @@ res <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
 unnest_nodes(res$nodes)
 ```
 
-Note that this will return NA for the properties not in a node. For example here, we have no 'licence' information for the Maintainer node (that makes sense). 
+Please, note that this function will return `NA` for the properties that aren't in a node. For example here, we have no 'licence' information for the Maintainer node (that makes sense). 
 
+<<<<<<< HEAD
 On the long run, and this is not {neo4r} specific but Neo4J related, a good practice is to have a "name" propertie on each node, so this column will be full here.
+=======
+On the long run, and this is not `{neo4r}` specific by Neo4J related, a good practice is to point out a "name" property on each node, so this column will be full here.
+>>>>>>> 063e7f2e732a5f214a8e552bb1ce0729a5396f1a
 
-You can also either unnest only the properties or the labels : 
+Also, it is possible to unnest either the properties or the labels : 
 
 ```{r}
 res$nodes %>%
@@ -182,7 +186,7 @@ res$nodes %>%
 
 + `unnest_relationships`
 
-There is only one nested column in the relationship table, so the function is quite straightforward : 
+There is only one nested column in the relationship table, thus the function is quite straightforward : 
 
 ```{r}
 unnest_relationships(res$relationships)
@@ -198,15 +202,15 @@ unnest_graph(res)
 
 ## Convert for common graph packages
 
-Unless otherwise specified, the functions do an `unnest_graph` before being transformed to a graph object.
+Unless otherwise specified, the function carries out an `unnest_graph` before being transformed into a graph object.
 
 ### {igraph}
 
-To be converted to a graph object, 
+In order to be converted into a graph object, 
 
-+ the nodes need an id, and a name. By defaut, the node name is assumed to be found in the "name" property return by the graph, but you can specify any other column. The "label" column from Neo4J is renamed "group".
++ nodes need an id, and a name. By default, node name is assumed to be found in the "name" property returned by the graph, specifying any other column is allowed. The "label" column from Neo4J is renamed "group".
 
-+ relationships needs a start and end, which are startNode and endNode in the Neo4J results. 
++ relationships need a start and an end, *i.e.* startNode and endNode in the Neo4J results. 
 
 ```{r}
 res %>%
@@ -222,7 +226,7 @@ Which means that you can :
   plot()
 ```
 
-This can also be used with ggraph :
+This can also be used with `{ggraph}` :
 
 ```{r}
 library(ggraph)
@@ -245,7 +249,7 @@ visNetwork::visNetwork(network$nodes, network$relationships)
 ```
 
 
-## Sending data to the api 
+## Sending data to the API 
 
 You can simply send queries has we have just seen, by writing the cypher query and call the api.  
 
