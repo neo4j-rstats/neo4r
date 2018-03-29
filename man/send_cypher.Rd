@@ -26,5 +26,6 @@ Send a cypher file to be executed
 \examples{
 \dontrun{
 send_cypher("random/create.cypher")
+path <- "data-raw/constraints.cypher"
 }
 }
