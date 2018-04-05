@@ -20,6 +20,7 @@ addons:
   apt:
     packages:
       - default-jre
+      - systemd
 
 before_install:
   - wget -O - https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
