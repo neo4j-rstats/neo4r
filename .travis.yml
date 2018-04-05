@@ -19,7 +19,7 @@ dist: trusty
 addons:
   apt:
     packages:
-      - openjdk-8-jdk
+      - default-jre
 
 before_install:
   - wget -O - https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
