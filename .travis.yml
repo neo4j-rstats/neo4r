@@ -30,6 +30,8 @@ before_install:
   - sudo service neo4j start
   - sudo service neo4j status | cat
 
+r_packages:
+  - roxygen2
 
 script:
   - R CMD build . --no-build-vignettes --no-manual
