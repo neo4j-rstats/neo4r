@@ -37,7 +37,6 @@ read_cypher <- function(file){
 #' @param include_stats wether of not to include stats
 #' @param meta wether of not to include meta info
 #'
-#' @return
 #' @export
 #'
 #' @examples
