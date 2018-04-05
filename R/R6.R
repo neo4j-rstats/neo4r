@@ -29,7 +29,7 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            auth = character(0),
                            initialize = function(url, user, password){
                              # Clean url in case it ends with a /
-                             url <- gsub("(.*)/", "\\1", url)
+                             url <- gsub("(.*)/$", "\\1", url)
                              self$url <- url
                              self$user <- user
                              self$password <- password
