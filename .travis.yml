@@ -27,8 +27,9 @@ before_install:
   - echo 'deb https://debian.neo4j.org/repo stable/' | sudo tee /etc/apt/sources.list.d/neo4j.list
   - sudo apt-get update
   - sudo apt-get install neo4j
-  - systemctl start neo4j.service
-  - systemctl status neo4j.service
+  - sudo systemctl start neo4j.service
+  - sudo systemctl status neo4j.service --no-pager
+
 
 script:
   - R CMD build . --no-build-vignettes --no-manual
