@@ -28,7 +28,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install neo4j
   - sudo service neo4j start
-  - sudo systemctl status neo4j.service --no-pager
+  - sudo service neo4j status | cat
 
 
 script:
