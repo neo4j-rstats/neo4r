@@ -29,7 +29,7 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            auth = character(0),
                            initialize = function(url, user, password){
                              # Clean url in case it ends with a /
-                             url <- gsub("(.*)/", "\\1", url)
+                             url <- sub("/$", "", url)
                              self$url <- url
                              self$user <- user
                              self$password <- password
@@ -60,6 +60,7 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            },
                            # Get Neo4J version
                            get_version = function(){
+                             browser()
                              res <- get_wrapper(self, "db/data")
                              content(res)$neo4j_version
                            },
@@ -94,6 +95,7 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
 # "If you need to copy and paste something more than twice, write a function"
 
 get_wrapper <- function(self, url){
+  #browser()
   GET(glue("{self$url}/{url}"),
       add_headers(.headers = c("Content-Type"="application/json",
                                "accept"="application/json",
