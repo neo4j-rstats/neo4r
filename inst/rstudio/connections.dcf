@@ -1,0 +1,4 @@
+Name: Neo4J
+ShinyApp: run_app
+HelpUrl: https://github.com/neo4j-rstats
+Icon: icons/neologo.png

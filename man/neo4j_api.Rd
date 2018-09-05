@@ -16,16 +16,17 @@ A Neo4J Connexion
 }
 \section{Methods}{
 
-\describe{
-  \item{\code{access}}{list url, user and password}
-  \item{\code{ping}}{test your connexion}
-  \item{\code{version}}{Neo4J version}
-  \item{\code{get}}{Get a list of either relationship, labels, }
-}
+\describe{ \item{\code{access}}{list url, user and
+  password} \item{\code{ping}}{test your connexion}
+  \item{\code{version}}{Neo4J version} \item{\code{get}}{Get a list of either
+  relationship, labels, } }
 }
 
 \examples{
+\dontrun{
 con <- neo4j_api$new(url = "http://localhost:7474", user = "neo4j", password = "password")
+}
+
 
 }
 \keyword{datasets}
