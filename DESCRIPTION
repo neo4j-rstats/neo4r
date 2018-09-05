@@ -16,8 +16,11 @@ Imports:
     magrittr,
     purrr,
     R6,
+    rstudioapi,
+    shiny,
     tidyr,
     tidyselect
+    utils
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1

@@ -1,12 +1,10 @@
 #' A Neo4J Connexion
 #'
 #' @section Methods:
-#' \describe{
-#'   \item{\code{access}}{list url, user and password}
-#'   \item{\code{ping}}{test your connexion}
-#'   \item{\code{version}}{Neo4J version}
-#'   \item{\code{get}}{Get a list of either relationship, labels, }
-#' }
+#' \describe{ \item{\code{access}}{list url, user and
+#'   password} \item{\code{ping}}{test your connexion}
+#'   \item{\code{version}}{Neo4J version} \item{\code{get}}{Get a list of either
+#'   relationship, labels, } }
 #'
 #' @return A Neo4J Connexion
 #'
@@ -19,7 +17,10 @@
 #' @export
 #'
 #' @examples
-#' con <- neo4j_api$new(url = "http://localhost:7474", user = "neo4j", password = "password")
+#'\dontrun{
+#'con <- neo4j_api$new(url = "http://localhost:7474", user = "neo4j", password = "password")
+#'}
+#'
 #'
 neo4j_api <- R6::R6Class("Neo4JAPI",
                          public = list(
@@ -27,7 +28,10 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            user = character(0),
                            password = character(0),
                            auth = character(0),
+                           relationships = data.frame(0),
+                           labels = data.frame(0),
                            initialize = function(url, user, password){
+                             #browser()
                              # Clean url in case it ends with a /
                              url <- gsub("(.*)/$", "\\1", url)
                              self$url <- url
@@ -56,6 +60,7 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            # This only return the status code for now so I wonder
                            # if we should make if verbose instead of just returning SC
                            ping = function(){
+                             #browser()
                              attempt(status_code(get_wrapper(self, "db/data/relationship/types")))
                            },
                            # Get Neo4J version
@@ -67,12 +72,16 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            # return it as a data.frame because data.frame are cool
                            get_relationships = function(){
                              res <- get_wrapper(self, "db/data/relationship/types")
-                             tibble(relationships = as.character(content(res)))
+                             tibble(labels = as.character(content(res)))
                            },
                            # Get a list of labels registered in the db
                            # Tibbles are awesome
                            get_labels = function(){
                              res <- get_wrapper(self, "db/data/labels")
+                             tibble(labels = as.character(content(res)))
+                           },
+                           get_property_keys = function(){
+                             res <- get_wrapper(self, "db/data/propertykeys")
                              tibble(labels = as.character(content(res)))
                            },
                            # Get the schema of the db
@@ -94,14 +103,19 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
 # "If you need to copy and paste something more than twice, write a function"
 
 get_wrapper <- function(self, url){
+  #browser()
   GET(glue("{self$url}/{url}"),
       add_headers(.headers = c("Content-Type"="application/json",
                                "accept"="application/json",
-                               "Authorization"= paste0("Basic ", self$auth))))
+                               "Authorization"= paste0("Basic ", self$auth))
+                  ))
 }
 
-# con <- neo4j_api$new(url = "http://localhost:7474/", user = "neo4j", password = "pouetpouet")
+# con <- neo4r::neo4j_api$new(url = "http://localhost:7474/", user = "neo4j", password = "pouetpouet")
 # con$ping()
 # con$url
-# con$version()
+# con$get_constraints()
+# con$get_labels()
+# con$get_relationships()
+# con$get_schema()
 

@@ -7,6 +7,8 @@ library(glue)
 library(purrr)
 library(dplyr)
 library(tidyr)
+library(shiny)
+
 # Remove default DESC
 unlink("DESCRIPTION")
 # Create and clean desc
@@ -57,4 +59,7 @@ use_package("purrr")
 use_package("tidyr")
 use_package("igraph")
 use_package("R6")
+use_package("shiny")
+use_package("rstudioapi")
+use_package("utils")
 use_tidy_description()
