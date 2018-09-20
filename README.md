@@ -316,12 +316,9 @@ Please, note that this function will return `NA` for the properties that
 aren’t in a node. For example here, we have no ‘licence’ information for
 the Maintainer node (that makes sense).
 
-\<\<\<\<\<\<\< HEAD On the long run, and this is not {neo4r} specific
+On the long run, and this is not {neo4r} specific
 but Neo4J related, a good practice is to have a “name” propertie on each
-node, so this column will be full here. ======= On the long run, and
-this is not `{neo4r}` specific by Neo4J related, a good practice is to
-point out a “name” property on each node, so this column will be full
-here. \>\>\>\>\>\>\> 063e7f2e732a5f214a8e552bb1ce0729a5396f1a
+node, so this column will be full here. 
 
 Also, it is possible to unnest either the properties or the labels :
 
