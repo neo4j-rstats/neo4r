@@ -19,7 +19,7 @@ Imports:
     rstudioapi,
     shiny,
     tidyr,
-    tidyselect
+    tidyselect,
     utils
 Encoding: UTF-8
 LazyData: true
