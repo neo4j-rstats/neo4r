@@ -17,20 +17,18 @@ knitr::opts_chunk$set(
 # con_name <- as.numeric(Sys.time() + 1)
 # system(glue::glue("docker run --publish=7474:7474 --publish=7687:7687 --env NEO4J_AUTH=neo4j/pouetpouet --name {con_name} neo4j4test"), wait = FALSE)
 con <- neo4r::neo4j_api$new(url = "http://localhost:7474",
-                            user = "neo4j", password = "pouetpouet")
+                            user = "neo4j", password = "neo4j")
 while(con$ping() != 200) {
   Sys.sleep(1)
 }
 library(neo4r)
-send_cypher("data-raw/constraints.cypher", con, include_stats = TRUE)
-
-
-'USING PERIODIC COMMIT 500
-LOAD CSV WITH HEADERS FROM "file:///pkg.csv" AS csv 
-MERGE (p:Package {name: csv.Package, version: csv.Version, license: csv.License, date: csv.Date, title: csv.Title})
-MERGE (m:Maintainer {name: csv.Maintainer})
-CREATE (m) -[:MAINTAINS]-> (p);' %>%
-  call_api(con, include_stats = TRUE)
+con <- neo4j_api$new(
+  url = "http://localhost:7474",
+  user = "neo4j", 
+  password = "pouetpouet"
+  )
+call_api("MATCH (n) DETACH DELETE n", con)
+send_cypher("data-raw/create.cypher", con)
 
 ```
 
@@ -54,8 +52,8 @@ The connexion object is also an easy to control R6 method, allowing you to updat
 You can install {neo4r} from GitHub with:
 
 ```{r gh-installation, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("neo4j-rstats/neo4r")
+# install.packages("remotes")
+remotes::install_github("neo4j-rstats/neo4r")
 ```
 
 ## Create a connexion object 
@@ -123,32 +121,25 @@ The user chooses wether or not to return a list of tibbles when calling the API.
 ```{r}
 library(magrittr)
 
-'MATCH (p:Package) RETURN p.name AS nom LIMIT 5' %>%
+'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
   call_api(con)
 ```
 
 By default, results are returned as an R list of tibbles. We think this is the more "truthful" way to implement the outputs regarding Neo4J calls. 
 
-For example, when you want to return two nodes, you'll get two results, in the form of two tibbles (p.name and dep.name here): 
-
-```{r}
-'MATCH (p:Package) <-[:MAINTAINS]-(main:Maintainer) RETURN p.name AS nom, main.name AS maintainer LIMIT 5' %>%
-  call_api(con)
-```
-
-The result is a two elements list with each element being labelled the way it has been specified in the Cypher query. 
+For example, when you want to return two nodes types, you'll get two results, in the form of two tibbles (what we've seen just before) - the result is a two elements list with each element being labelled the way it has been specified in the Cypher query. 
 
 Results can also be returned in JSON:
 
 ```{r}
-'MATCH (p:Package) <-[:MAINTAINS]-(main:Maintainer) RETURN p.name AS nom, main.name AS maintainer LIMIT 5' %>%
+'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN * LIMIT 1;' %>%
   call_api(con, output = "json")
 ```
 
 If you turn the `type` argument to `"graph"`, you'll get a graph result: 
 
 ```{r}
-'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
+'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
   call_api(con, type = "graph")
 ```
 
@@ -158,7 +149,7 @@ Due to the specific data format of Neo4J, there can be more than one label and p
 
 We have designed several functions to unnest the output : 
 
-+ #### unnest_nodes, that can unnest a node dataframe : 
++`unnest_nodes()`, that can unnest a node dataframe : 
 
 ```{r}
 res <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
@@ -182,7 +173,7 @@ res$nodes %>%
   unnest_nodes(what = "label")
 ```
 
-+ `unnest_relationships`
++ `unnest_relationships()`
 
 There is only one nested column in the relationship table, thus the function is quite straightforward : 
 
@@ -198,27 +189,42 @@ This function takes a graph results, and does `unnest_nodes` and `unnest_relatio
 unnest_graph(res)
 ```
 
-## Convert for common graph packages
+### Extraction 
 
-Unless otherwise specified, the function carries out an `unnest_graph` before being transformed into a graph object.
+There are two convenient functions to extract nodes and relationships: 
+
+```{r}
+'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+  call_api(con, type = "graph") %>% 
+  extract_nodes()
+```
+
+```{r}
+'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+  call_api(con, type = "graph") %>% 
+  extract_relationships()
+```
+
+## Convert for common graph packages
 
 ### {igraph}
 
-In order to be converted into a graph object, 
+In order to be converted into a graph object:
 
 + nodes need an id, and a name. By default, node name is assumed to be found in the "name" property returned by the graph, specifying any other column is allowed. The "label" column from Neo4J is renamed "group".
 
 + relationships need a start and an end, *i.e.* startNode and endNode in the Neo4J results. 
 
 ```{r}
-res %>%
+'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+  call_api(con, type = "graph") %>%
   convert_to("igraph")
 ```
 
 Which means that you can : 
 
 ```{r}
-'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
+'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
   call_api(con, type = "graph") %>% 
   convert_to("igraph") %>%
   plot()
@@ -228,7 +234,7 @@ This can also be used with `{ggraph}` :
 
 ```{r}
 library(ggraph)
-'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 10' %>%
+'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
   call_api(con, type = "graph") %>% 
   convert_to("igraph") %>%
   ggraph() + 
@@ -240,7 +246,7 @@ library(ggraph)
 ### {visNetwork}
 
 ```{r eval = FALSE}
-network <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 10' %>%
+network <- 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
   call_api(con, type = "graph") %>% 
   convert_to("visNetwork")
 visNetwork::visNetwork(network$nodes, network$relationships)
@@ -251,19 +257,29 @@ visNetwork::visNetwork(network$nodes, network$relationships)
 
 You can simply send queries has we have just seen, by writing the cypher query and call the api.  
 
-### Sending an R data.frame
+### Transform elements to cypher queries
 
-+ `as_nodes` turns a dataframe into a series of nodes : 
++ `vec_to_cypher()` creates a list : 
 
-// Coming soon
+```{r}
+vec_to_cypher(iris[1, 1:3], "Species")
+```
 
-+ `as_relationships`
++ and `vec_to_cypher_with_var()` creates a cypher call starting with a variable : 
 
-// Coming soon
+```{r}
+vec_to_cypher_with_var(iris[1, 1:3], "Species", a)
+```
+
+This can be combined inside a cypher call: 
+
+```{r}
+paste("MERGE", vec_to_cypher(iris[1, 1:3], "Species"))
+```
 
 ### Reading and sending a cypher file :
 
-+ `read_cypher` reads a cypher file and returns a tibble of all the calls
++ `read_cypher` reads a cypher file and returns a tibble of all the calls:
 
 ```{r}
 read_cypher("data-raw/create.cypher")
@@ -274,7 +290,6 @@ read_cypher("data-raw/create.cypher")
 ```{r eval = FALSE}
 send_cypher("data-raw/constraints.cypher", con)
 ```
-
 
 ### Sending csv dataframe to Neo4J
 
@@ -312,6 +327,7 @@ load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tr
          as = "csvLine", on_load = on_load_query)
 ```
 
+## CoC 
 
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.

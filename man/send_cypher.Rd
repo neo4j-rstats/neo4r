@@ -4,8 +4,8 @@
 \alias{send_cypher}
 \title{Send a cypher file to be executed}
 \usage{
-send_cypher(path, con, type = c("row", "graph"), output = c("r", "json"),
-  include_stats = TRUE, meta = FALSE)
+send_cypher(path, con, type = c("row", "graph"), output = c("r",
+  "json"), include_stats = TRUE, meta = FALSE)
 }
 \arguments{
 \item{path}{the path to the cypher file}
@@ -19,6 +19,9 @@ send_cypher(path, con, type = c("row", "graph"), output = c("r", "json"),
 \item{include_stats}{wether of not to include stats}
 
 \item{meta}{wether of not to include meta info}
+}
+\value{
+a cypher call
 }
 \description{
 Send a cypher file to be executed

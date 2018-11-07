@@ -36,7 +36,7 @@ read_cypher <- function(file){
 #' @param output the printing method (r or json)
 #' @param include_stats wether of not to include stats
 #' @param meta wether of not to include meta info
-#'
+#' @return a cypher call
 #' @export
 #'
 #' @examples

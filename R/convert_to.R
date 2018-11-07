@@ -1,15 +1,10 @@
-# con <- neo4r::neo4j_api$new(url = "http://localhost:7474", user = "neo4j", password = "pouetpouet")
-# con$ping()
-# res <- call_api("MATCH p=()-[r:PROGRAMS_IN]->() RETURN p, r LIMIT 25", con, type = "graph")
-# res <- call_api("MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 25", con, type = "graph")
-
 #' Convert to another graph format
 #'
 #' @param res the res object from the API
 #' @param format the format (either igraph or visNetwork)
 #' @param label the column to be considered as the label columns
 #'
-#' @importFrom dplyr select
+#' @importFrom dplyr select enquo
 #' @importFrom igraph graph_from_data_frame
 #' @importFrom tidyselect everything
 #'
@@ -54,10 +49,6 @@ convert_to <- function(res, format = c("visNetwork", "igraph"), label = name){
 
   }
 }
-
-
-# convert_to(res, "visNetwork")
-# df <- res$nodes
 
 parse_node <- function(df){
   id <- df$id
