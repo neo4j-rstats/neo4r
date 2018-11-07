@@ -14,21 +14,15 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-# con_name <- as.numeric(Sys.time() + 1)
-# system(glue::glue("docker run --publish=7474:7474 --publish=7687:7687 --env NEO4J_AUTH=neo4j/pouetpouet --name {con_name} neo4j4test"), wait = FALSE)
-con <- neo4r::neo4j_api$new(url = "http://localhost:7474",
-                            user = "neo4j", password = "neo4j")
-while(con$ping() != 200) {
-  Sys.sleep(1)
-}
-library(neo4r)
-con <- neo4j_api$new(
-  url = "http://localhost:7474",
-  user = "neo4j", 
-  password = "pouetpouet"
-  )
-call_api("MATCH (n) DETACH DELETE n", con)
-send_cypher("data-raw/create.cypher", con)
+
+# library(neo4r)
+# con <- neo4j_api$new(
+#   url = "http://localhost:7474",
+#   user = "neo4j", 
+#   password = "pouetpouet"
+#   )
+#call_api("MATCH (n) DETACH DELETE n", con)
+#send_cypher("data-raw/create.cypher", con)
 
 ```
 
@@ -36,6 +30,7 @@ send_cypher("data-raw/create.cypher", con)
 
 > Disclaimer: this package is still at an experimental level and under active development. You should only use it for testing, reporting bugs (which are to be expected), proposing changes to the code, requesting features, sending ideas... As long as this package is in "Experimental" mode, there might be bugs, and changes to the API are to be expected. Read the [NEWS.md](NEWS.md) to be informed of the last changes.
 
+Read complementary documentation at [https://neo4j-rstats.github.io/user-guide/](https://neo4j-rstats.github.io/user-guide/)
 
 # neo4r
 
@@ -152,7 +147,7 @@ We have designed several functions to unnest the output :
 +`unnest_nodes()`, that can unnest a node dataframe : 
 
 ```{r}
-res <- 'MATCH p=()-[r:MAINTAINS]->() RETURN p LIMIT 5' %>%
+res <- 'MATCH (r:record) -[w:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
   call_api(con, type = "graph")
 unnest_nodes(res$nodes)
 ```
@@ -200,7 +195,7 @@ There are two convenient functions to extract nodes and relationships:
 ```
 
 ```{r}
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+'MATCH p=()-[w:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
   call_api(con, type = "graph") %>% 
   extract_relationships()
 ```
