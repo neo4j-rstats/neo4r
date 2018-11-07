@@ -1,7 +1,10 @@
 Package: neo4r
 Title: A Modern and Flexible Neo4J Driver
-Version: 0.0.0.9000
-Authors@R: person('Colin', 'Fay', email = 'colin@thinkr.fr', role = c('cre', 'aut'))
+Version: 0.0.0.9500
+Authors@R: c(
+    person('Colin', 'Fay', email = 'colin@thinkr.fr', role = c('cre', 'aut'), comment = c(ORCID = "0000-0001-7343-1846")), 
+    person('ThinkR', role = 'cph'),
+    person('Neo4J', role = 'spn'))
 Description: A Modern and Flexible Neo4J Driver.
 License: MIT + file LICENSE
 URL: https://github.com/neo4j-rstats/neo4r
@@ -16,9 +19,10 @@ Imports:
     purrr,
     R6,
     rstudioapi,
-    shiny,
     tidyr,
-    utils
+    utils,
+    magrittr,
+    tidyselect
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

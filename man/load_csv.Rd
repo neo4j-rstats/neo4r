@@ -4,9 +4,9 @@
 \alias{load_csv}
 \title{Load a CSV to Neo4J}
 \usage{
-load_csv(on_load = "", con, url, header = TRUE, periodic_commit = 1000,
-  as = "csv", type = c("row", "graph"), output = c("r", "json"),
-  include_stats = TRUE, meta = FALSE)
+load_csv(on_load = "", con, url, header = TRUE,
+  periodic_commit = 1000, as = "csv", type = c("row", "graph"),
+  output = c("r", "json"), include_stats = TRUE, meta = FALSE)
 }
 \arguments{
 \item{on_load}{the code to execute on load}

@@ -111,8 +111,8 @@ get_wrapper <- function(self, url){
                   ))
 }
 
-# con <- neo4r::neo4j_api$new(url = "http://localhost:7474/", user = "neo4j", password = "pouetpouet")
-# con$ping()
+#con <- neo4r::neo4j_api$new(url = "http://localhost:7473/", user = "neo4j", password = "pouetpouet")
+#con$ping()
 # con$url
 # con$get_constraints()
 # con$get_labels()

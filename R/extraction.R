@@ -5,6 +5,7 @@
 #' @return a tibble
 #' @export
 #' @rdname extract
+#'
 
 extract_nodes <- function(x){
   x$nodes
