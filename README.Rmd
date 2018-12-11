@@ -94,6 +94,14 @@ con$get_relationships()
 con$get_schema()
 ```
 
+### Using the Connection Pane
+
+`{neo4r}` comes with a Connection Pane interface for RStudio. 
+
+Once installed, you can go to the "Connections", and use the widget to connect to the Neo4J server: 
+
+![](readmefigs/connectionpane.png)
+
 ## Call the API
 
 You can either create a separate query or insert it inside the `call_api` function. 
