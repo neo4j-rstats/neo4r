@@ -60,7 +60,7 @@ list_columns <- function(table, url, auth) {
         stringsAsFactors = FALSE
       )
     }
-  } else if (table == "constraints"){
+  } else if (table == "Constraints"){
     res <- get_wrapper_for_connect(url, "db/data/schema/constraints" ,auth)
     res <- tibble(labels = as.character(content(res)))
     if (nrow(res) != 0 ) {
