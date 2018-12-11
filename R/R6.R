@@ -30,6 +30,17 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            auth = character(0),
                            relationships = data.frame(0),
                            labels = data.frame(0),
+                           print = function(){
+                             cat("<neo4j connection object>\n")
+                             if (self$ping() == 200){
+                               cat("Connected at", self$url, "\n")
+                               cat("User:", self$user, "\n")
+                               cat("Neo4j version:", self$get_version(), "\n")
+                             } else {
+                               cat("No registered Connection\n")
+                               cat("(Wrong credentials or hostname)\n")
+                             }
+                           },
                            initialize = function(url, user, password){
                              #browser()
                              # Clean url in case it ends with a /
@@ -108,14 +119,8 @@ get_wrapper <- function(self, url){
       add_headers(.headers = c("Content-Type"="application/json",
                                "accept"="application/json",
                                "Authorization"= paste0("Basic ", self$auth))
-                  ))
+      ))
 }
 
-#con <- neo4r::neo4j_api$new(url = "http://localhost:7473/", user = "neo4j", password = "pouetpouet")
-#con$ping()
-# con$url
-# con$get_constraints()
-# con$get_labels()
-# con$get_relationships()
-# con$get_schema()
+
 
