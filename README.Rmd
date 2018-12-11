@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 
-> Disclaimer: this package is still at an experimental level and under active development. You should only use it for testing, reporting bugs (which are to be expected), proposing changes to the code, requesting features, sending ideas... As long as this package is in "Experimental" mode, there might be bugs, and changes to the API are to be expected. Read the [NEWS.md](NEWS.md) to be informed of the last changes.
+> Disclaimer: this package is still under active development. Read the [NEWS.md](NEWS.md) to be informed of the last changes.
 
 Read complementary documentation at [https://neo4j-rstats.github.io/user-guide/](https://neo4j-rstats.github.io/user-guide/)
 
@@ -41,6 +41,10 @@ It's modern in the sense that the results are returned as tibbles whenever possi
 It's flexible in the sense that it is rather unopinionated regarding the way it returns the results, by trying to stay as close as possible to the way Neo4J returns data. That way, you have the control over the way you will compute the results. At the same time, the result is not too complex, so that the "heavy lifting" of data wrangling is not left to the user. 
 
 The connexion object is also an easy to control R6 method, allowing you to update and query information from the API. 
+
+## Server Connection 
+
+Please note that __for now, the connection is only possible through http / https__.
 
 ## Installation
 
@@ -114,8 +118,6 @@ The `call_api()` function takes several arguments :
 + `output` : the output format (R or json) 
 + `include_stats` : whether or not to include the stats about the call 
 + `meta` : wether or not to include the meta arguments of the nodes when calling with "rows"
-
-> It will be possible to write queries and pipe them with `{cyphersugar}` at the end of the developping process of all the planned packages. `{cyphersugar}` will offer a *syntactic sugar* on top of Cypher.
 
 ### "rows" format
 
@@ -329,6 +331,16 @@ load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tr
          con = con, header = TRUE, periodic_commit = 50, 
          as = "csvLine", on_load = on_load_query)
 ```
+
+## Sandboxing in Docker 
+
+You can get an RStudio / Neo4J sandbox with Docker : 
+
+```
+docker pull colinfay/neo4r-docker
+docker run -e PASSWORD=plop -e ROOT=TRUE -d -p 8787:8787 neo4r
+```
+
 
 ## CoC 
 
