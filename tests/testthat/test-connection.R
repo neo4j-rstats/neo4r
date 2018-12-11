@@ -1,9 +1,23 @@
 context("test-connection.R")
 
-test_that("connection work", {
+test_that("connection object", {
   expect_is(con, "Neo4JAPI")
   expect_is(con, "R6")
-  expect_equal(con$ping(), "200")
+  expect_equal(con$ping(), 200)
+  expect_equal(con$access()$url, "http://localhost:7474")
+  expect_equal(con$access()$user, "neo4j")
+  expect_equal(con$access()$password, "neo4j")
+  expect_equal(ncol(con$get_constraints()), 3)
+  expect_equal(names(con$get_constraints()), c("label", "type", "property_keys"))
+  expect_equal(ncol(con$get_labels()), 1)
+  expect_equal(names(con$get_labels()), c("labels"))
+  expect_equal(ncol(con$get_property_keys()), 1)
+  expect_equal(names(con$get_property_keys()), c("labels"))
+  expect_equal(ncol(con$get_relationships()), 1)
+  expect_equal(names(con$get_relationships()), c("labels"))
+  expect_equal(ncol(con$get_schema()), 2)
+  expect_equal(names(con$get_schema()), c("label", "property_keys"))
+  expect_is(con$get_version(), "character")
 })
 
 
