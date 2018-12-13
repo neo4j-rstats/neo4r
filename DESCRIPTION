@@ -16,7 +16,6 @@ Imports:
     httr,
     igraph,
     jsonlite,
-    magrittr,
     purrr,
     R6,
     rstudioapi,
