@@ -1,6 +1,6 @@
 #' @importFrom httr content
 #' @importFrom attempt stop_if
-#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr compact
+#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr compact flatten_dfr
 #' @importFrom tidyr gather
 
 parse_api_results <- function(res, type, include_stats, meta, format){
@@ -34,22 +34,21 @@ parse_api_results <- function(res, type, include_stats, meta, format){
   res_names <- results$columns
   # Get the data
   res_data <- results$data
-
-  if (!meta){
-    res_data <- map(res_data, function(x){
-      x$meta <- NULL
-      x
-    })
+  #res_data <- readRDS("inst/res_data.RDS")
+  #res_names <- readRDS("inst/res_names.RDS")
+  if (meta) {
+    res_meta <- res_data$meta
   }
+
+  res_data <- map(res_data, function(x){
+    x$meta <- NULL
+    x
+  })
 
   if (type == "row"){
     # Type = row
-    res <- map(res_data, flatten) %>%
-      transpose() %>%
-      map(as_vector) %>%
-      compact() %>%
-      map(as_tibble) %>%
-      setNames(res_names)
+    res <- map(res_data, flatten_dfr) %>%
+      bind_rows()
     if (include_stats){
       c(res, list(stats = stats))
     } else {
@@ -59,7 +58,6 @@ parse_api_results <- function(res, type, include_stats, meta, format){
   } else if (type == "graph") {
     # Get the graph sublist
     graph <- map(res_data, "graph")
-
     # Get the nodes
     nodes <- compact(map(graph, "nodes"))
     # Get the relationships
