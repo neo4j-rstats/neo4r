@@ -44,10 +44,12 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 
   if (type == "row"){
     # Type = row
-    res <- map(res_data, ~ gather_row_meta(.x, list_names = res_names)) %>%
+    res <- map(res_data, flatten) %>%
       transpose() %>%
-      map(try_to_bind_rows) %>%
-      map(try_to_unnest)
+      map(as_vector) %>%
+      compact() %>%
+      map(as_tibble) %>%
+      setNames(res_names)
     if (include_stats){
       c(res, list(stats = stats))
     } else {
