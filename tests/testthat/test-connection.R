@@ -15,8 +15,8 @@ test_that("connection object", {
   expect_equal(names(con$get_property_keys()), c("labels"))
   expect_equal(ncol(con$get_relationships()), 1)
   expect_equal(names(con$get_relationships()), c("labels"))
-  expect_equal(ncol(con$get_schema()), 3)
-  expect_equal(names(con$get_schema()), c("label", "property_keys", "labels"))
+  expect_equal(ncol(con$get_schema()), 2)
+  expect_equal(names(con$get_schema()), c("label", "property_keys"))
   expect_is(con$get_version(), "character")
 })
 
