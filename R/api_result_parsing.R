@@ -47,10 +47,25 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 
   if (type == "row"){
     # Type = row
-    res <- flatten(res_data) %>%
-      transpose() %>%
-      map(flatten_dfr) %>%
-      setNames(res_names)
+    # Special case for handling arrays
+    #browser()
+    res <- attempt::attempt({
+      flatten(res_data) %>%
+        transpose() %>%
+        map(flatten_dfr)
+    }, silent = TRUE)
+    if (class(res) == "try-error"){
+      res <- flatten(res_data) %>%
+        purrr::map_dfr(purrr::flatten_dfc) %>%
+        list()
+    }
+    # if (is.null(names(flatten(flatten(flatten(res_data)))))) {
+    #   res <- flatten(res_data) %>%
+    #     purrr::map_dfr(purrr::flatten_dfc)
+    # } else {
+      res <-  res %>%
+        setNames(res_names)
+    #}
     if (include_stats){
       c(res, list(stats = stats))
     } else {

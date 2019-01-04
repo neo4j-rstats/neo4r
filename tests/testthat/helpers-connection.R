@@ -3,12 +3,12 @@ con <- neo4j_api$new(url = "http://localhost:7474",
                      user = "neo4j",
                      password = "neo4j")
 
-call_api("CREATE CONSTRAINT ON (al:Band) ASSERT al.name IS UNIQUE;", con)
-call_api("CREATE CONSTRAINT ON (al:City) ASSERT al.name IS UNIQUE;", con)
-call_api("CREATE CONSTRAINT ON (al:record) ASSERT al.name IS UNIQUE;", con)
-call_api("CREATE CONSTRAINT ON (al:artist) ASSERT al.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (al:Band) ASSERT al.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (al:City) ASSERT al.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (al:record) ASSERT al.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (al:artist) ASSERT al.name IS UNIQUE;", con)
 
-call_api("MERGE (ancient:Band {name: 'Ancient', formed: 1992})
+call_neo4j("MERGE (ancient:Band {name: 'Ancient', formed: 1992})
 MERGE (acturus:Band {name: 'Arcturus', formed: 1991})
 MERGE (burzum:Band {name: 'Burzum', formed: 1991})
 MERGE (carpathianforest:Band {name: 'Carpathian Forest', formed: 1990})
