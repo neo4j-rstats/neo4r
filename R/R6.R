@@ -8,6 +8,7 @@
 #'
 #' @return A Neo4J Connexion
 #'
+#' @importFrom attempt attempt
 #' @importFrom R6 R6Class
 #' @importFrom httr GET status_code add_headers content
 #' @importFrom purrr map as_vector
