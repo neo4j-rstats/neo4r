@@ -37,7 +37,7 @@ parse_api_results <- function(res, type, include_stats, meta, format){
   #res_data <- readRDS("inst/res_data.RDS")
   #res_names <- readRDS("inst/res_names.RDS")
   if (meta) {
-    res_meta <- res_data$meta
+    res_meta <- map(res_data, "meta")
   }
 
   res_data <- map(res_data, function(x){
@@ -47,8 +47,10 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 
   if (type == "row"){
     # Type = row
-    res <- map(res_data, flatten_dfr) %>%
-      bind_rows()
+    res <- flatten(res_data) %>%
+      transpose() %>%
+      map(flatten_dfr) %>%
+      setNames(res_names)
     if (include_stats){
       c(res, list(stats = stats))
     } else {
@@ -96,70 +98,73 @@ parse_api_results <- function(res, type, include_stats, meta, format){
     if (include_stats){
       res <- compact(list(nodes = nodes_tbl, relationships = relations_tbl, stats = stats))
       class(res) <- c("neo", class(res))
-      res
+
     } else {
       res <- compact(list(nodes = nodes_tbl, relationships = relations_tbl))
       if (length(res) != 0){
         class(res) <- c("neo", class(res))
-        res
+
       }
+    }
+    if (meta){
+      c(res, res_meta)
     }
   }
 
 
 }
 
-#' @importFrom dplyr as_tibble
-#' @importFrom attempt attempt
-
-try_to_tibble <- function(vec){
-  res <- attempt(as_tibble(vec), silent = TRUE)
-  if (class(res)[1] == "try-error"){
-    return(vec)
-  } else {
-    return(res)
-  }
-}
-try_to_bind_rows <- function(vec){
-  res <- attempt(bind_rows(vec), silent = TRUE)
-  if (class(res)[1] == "try-error"){
-    return(vec)
-  } else {
-    return(res)
-  }
-}
-
-#' @importFrom dplyr bind_cols
-#' @importFrom attempt attempt
-
-try_to_bind_cols <- function(vec){
-  res <- attempt(bind_cols(vec), silent = TRUE)
-  if (class(res)[1] == "try-error"){
-    return(vec)
-  } else {
-    return(res)
-  }
-}
-
-#' @importFrom tidyr unnest
-#' @importFrom attempt attempt
-
-try_to_unnest <- function(vec){
-  res <- attempt(unnest(vec), silent = TRUE)
-  if (class(res)[1] == "try-error"){
-    return(vec)
-  } else {
-    return(res)
-  }
-}
-
-#' @importFrom purrr transpose modify_depth discard map set_names
-#' @importFrom attempt attempt
-
-gather_row_meta <- function(x, list_names){
-  suppressWarnings(transpose(x)) %>%
-    modify_depth(2, try_to_tibble) %>%
-    modify_depth(1, ~ discard(.x, ~ length(.x) == 0)) %>%
-    map(try_to_bind_cols) %>%
-    set_names(list_names)
-}
+#' #' @importFrom dplyr as_tibble
+#' #' @importFrom attempt attempt
+#'
+#' try_to_tibble <- function(vec){
+#'   res <- attempt(as_tibble(vec), silent = TRUE)
+#'   if (class(res)[1] == "try-error"){
+#'     return(vec)
+#'   } else {
+#'     return(res)
+#'   }
+#' }
+#' try_to_bind_rows <- function(vec){
+#'   res <- attempt(bind_rows(vec), silent = TRUE)
+#'   if (class(res)[1] == "try-error"){
+#'     return(vec)
+#'   } else {
+#'     return(res)
+#'   }
+#' }
+#'
+#' #' @importFrom dplyr bind_cols
+#' #' @importFrom attempt attempt
+#'
+#' try_to_bind_cols <- function(vec){
+#'   res <- attempt(bind_cols(vec), silent = TRUE)
+#'   if (class(res)[1] == "try-error"){
+#'     return(vec)
+#'   } else {
+#'     return(res)
+#'   }
+#' }
+#'
+#' #' @importFrom tidyr unnest
+#' #' @importFrom attempt attempt
+#'
+#' try_to_unnest <- function(vec){
+#'   res <- attempt(unnest(vec), silent = TRUE)
+#'   if (class(res)[1] == "try-error"){
+#'     return(vec)
+#'   } else {
+#'     return(res)
+#'   }
+#' }
+#'
+#' #' @importFrom purrr transpose modify_depth discard map set_names
+#' #' @importFrom attempt attempt
+#'
+#' gather_row_meta <- function(x, list_names){
+#'   suppressWarnings(transpose(x)) %>%
+#'     modify_depth(2, try_to_tibble) %>%
+#'     modify_depth(1, ~ discard(.x, ~ length(.x) == 0)) %>%
+#'     map(try_to_bind_cols) %>%
+#'     set_names(list_names)
+#' }
