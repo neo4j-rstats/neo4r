@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 #   user = "neo4j", 
 #   password = "pouetpouet"
 #   )
-#call_api("MATCH (n) DETACH DELETE n", con)
+#call_neo4j("MATCH (n) DETACH DELETE n", con)
 #send_cypher("data-raw/create.cypher", con)
 
 ```
@@ -108,9 +108,9 @@ Once installed, you can go to the "Connections", and use the widget to connect t
 
 ## Call the API
 
-You can either create a separate query or insert it inside the `call_api` function. 
+You can either create a separate query or insert it inside the `call_neo4j` function. 
 
-The `call_api()` function takes several arguments : 
+The `call_neo4j()` function takes several arguments : 
 
 + `query` : the cypher query
 + `con` : the connexion object 
@@ -127,7 +127,7 @@ The user chooses wether or not to return a list of tibbles when calling the API.
 library(magrittr)
 
 'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
-  call_api(con)
+  call_neo4j(con)
 ```
 
 By default, results are returned as an R list of tibbles. We think this is the more "truthful" way to implement the outputs regarding Neo4J calls. 
@@ -138,14 +138,14 @@ Results can also be returned in JSON:
 
 ```{r}
 'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN * LIMIT 1;' %>%
-  call_api(con, output = "json")
+  call_neo4j(con, output = "json")
 ```
 
 If you turn the `type` argument to `"graph"`, you'll get a graph result: 
 
 ```{r}
 'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
-  call_api(con, type = "graph")
+  call_neo4j(con, type = "graph")
 ```
 
 The result is returned as one node or relationship by row. 
@@ -158,7 +158,7 @@ We have designed several functions to unnest the output :
 
 ```{r}
 res <- 'MATCH (r:record) -[w:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
-  call_api(con, type = "graph")
+  call_neo4j(con, type = "graph")
 unnest_nodes(res$nodes)
 ```
 
@@ -200,13 +200,13 @@ There are two convenient functions to extract nodes and relationships:
 
 ```{r}
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   extract_nodes()
 ```
 
 ```{r}
 'MATCH p=()-[w:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   extract_relationships()
 ```
 
@@ -222,7 +222,7 @@ In order to be converted into a graph object:
 
 ```{r}
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>%
+  call_neo4j(con, type = "graph") %>%
   convert_to("igraph")
 ```
 
@@ -230,7 +230,7 @@ Which means that you can :
 
 ```{r}
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   convert_to("igraph") %>%
   plot()
 ```
@@ -240,7 +240,7 @@ This can also be used with `{ggraph}` :
 ```{r}
 library(ggraph)
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   convert_to("igraph") %>%
   ggraph() + 
   geom_node_label(aes(label = name, color = group)) +
@@ -252,7 +252,7 @@ library(ggraph)
 
 ```{r eval = FALSE}
 network <- 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   convert_to("visNetwork")
 visNetwork::visNetwork(network$nodes, network$relationships)
 ```
@@ -314,8 +314,8 @@ The args are :
 
 ```{r eval = FALSE}
 # Create the constraints
-call_api("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
-call_api("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
 ```
 
 ```{r}

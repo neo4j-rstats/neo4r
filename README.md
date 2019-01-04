@@ -137,9 +137,9 @@ connect to the Neo4J server:
 ## Call the API
 
 You can either create a separate query or insert it inside the
-`call_api` function.
+`call_neo4j` function.
 
-The `call_api()` function takes several arguments :
+The `call_neo4j()` function takes several arguments :
 
   - `query` : the cypher query
   - `con` : the connexion object
@@ -161,7 +161,7 @@ statement.
 library(magrittr)
 
 'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
-  call_api(con)
+  call_neo4j(con)
 #> $b
 #> # A tibble: 14 x 2
 #>    name     formed
@@ -215,7 +215,7 @@ JSON:
 
 ``` r
 'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN * LIMIT 1;' %>%
-  call_api(con, output = "json")
+  call_neo4j(con, output = "json")
 #> [
 #>   [
 #>     {
@@ -251,7 +251,7 @@ result:
 
 ``` r
 'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
-  call_api(con, type = "graph")
+  call_neo4j(con, type = "graph")
 #> $nodes
 #> # A tibble: 17 x 3
 #>    id    label     properties
@@ -291,7 +291,7 @@ We have designed several functions to unnest the output :
 
 ``` r
 res <- 'MATCH (r:record) -[w:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
-  call_api(con, type = "graph")
+  call_neo4j(con, type = "graph")
 unnest_nodes(res$nodes)
 #> # A tibble: 17 x 5
 #>    id    label  release name                          formed
@@ -459,7 +459,7 @@ There are two convenient functions to extract nodes and relationships:
 
 ``` r
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   extract_nodes()
 #> # A tibble: 6 x 3
 #>   id    label     properties
@@ -474,7 +474,7 @@ There are two convenient functions to extract nodes and relationships:
 
 ``` r
 'MATCH p=()-[w:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   extract_relationships()
 #> # A tibble: 5 x 5
 #>   id    type         startNode endNode properties
@@ -504,7 +504,7 @@ In order to be converted into a graph object:
 
 ``` r
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>%
+  call_neo4j(con, type = "graph") %>%
   convert_to("igraph")
 #> IGRAPH 053dd83 DN-- 6 5 -- 
 #> + attr: name (v/c), group (v/c), release (v/n), formed (v/n), type
@@ -519,7 +519,7 @@ Which means that you can :
 
 ``` r
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   convert_to("igraph") %>%
   plot()
 ```
@@ -532,7 +532,7 @@ This can also be used with `{ggraph}` :
 library(ggraph)
 #> Loading required package: ggplot2
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   convert_to("igraph") %>%
   ggraph() + 
   geom_node_label(aes(label = name, color = group)) +
@@ -547,7 +547,7 @@ library(ggraph)
 
 ``` r
 network <- 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_api(con, type = "graph") %>% 
+  call_neo4j(con, type = "graph") %>% 
   convert_to("visNetwork")
 visNetwork::visNetwork(network$nodes, network$relationships)
 ```
@@ -632,8 +632,8 @@ The args are :
 
 ``` r
 # Create the constraints
-call_api("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
-call_api("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
+call_neo4j("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
 ```
 
 ``` r

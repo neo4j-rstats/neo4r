@@ -25,7 +25,7 @@ to_json_neo <- function(query, include_stats, meta, type){
 #'
 #' @examples
 #'
-call_api <- function(query, con, type = c("row","graph"), output = c("r", "json"),
+call_neo4j <- function(query, con, type = c("row","graph"), output = c("r", "json"),
                      include_stats = FALSE, meta = FALSE){
   #browser()
 

@@ -27,7 +27,7 @@ load_csv <- function(on_load = "", con, url, header = TRUE,
   } else {
     q <- glue("USING PERIODIC COMMIT {periodic_commit} LOAD CSV FROM '{url}' AS {as} {on_load}")
   }
-  call_api(query = q, con = con,type = type, output = output, include_stats = include_stats, meta = meta)
+  call_neo4j(query = q, con = con,type = type, output = output, include_stats = include_stats, meta = meta)
 }
 
 

@@ -50,7 +50,7 @@ send_cypher <- function(path, con, type = c("row","graph"), output = c("r", "jso
   type <- match.arg(type)
   output <- match.arg(output)
   res <- read_cypher(path)
-  map(res$cypher, ~ call_api(.x, con, type, output, include_stats, meta))
+  map(res$cypher, ~ call_neo4j(.x, con, type, output, include_stats, meta))
 }
 
 # con <- neo4r::neo4j_api$new(url = "http://localhost:7474", user = "neo4j",

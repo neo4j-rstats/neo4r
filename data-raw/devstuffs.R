@@ -47,7 +47,7 @@ use_news_md()
 
 # Test that
 use_testthat()
-use_test("")
+use_test("context-nba")
 
 # Get the dependencies
 use_package("attempt")

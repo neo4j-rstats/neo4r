@@ -12,7 +12,8 @@
 #' @export
 #'
 
-convert_to <- function(res, format = c("visNetwork", "igraph"), label = name){
+convert_to <- function(res, format = c("visNetwork", "igraph"),
+                       label = name){
   if (format == "visNetwork"){
     lab <- deparse(substitute(label))
     nodes <- unnest_nodes(res$nodes)
