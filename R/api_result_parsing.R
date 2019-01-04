@@ -63,8 +63,8 @@ parse_api_results <- function(res, type, include_stats, meta, format){
     #   res <- flatten(res_data) %>%
     #     purrr::map_dfr(purrr::flatten_dfc)
     # } else {
-      res <-  res %>%
-        setNames(res_names)
+    res <-  res %>%
+      setNames(res_names)
     #}
     if (include_stats){
       c(res, list(stats = stats))
