@@ -85,8 +85,9 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 
     # Verify that there is something to return
     if (length(nodes) == 0 & length(relations) == 0){
-      message("Your call can't be converted to a graph.")
-      message("Please switch to type = \"row\".")
+      message("No graph data found.")
+      message("Either your call can't be converted to a graph \nor there is no data at all matching your call.")
+      message("Verify your call or try type = \"row\".")
     }
 
     # Do something only if there are nodes
@@ -122,9 +123,9 @@ parse_api_results <- function(res, type, include_stats, meta, format){
       }
     }
     if (meta){
-      c(res, res_meta)
+      return(c(res, res_meta))
     } else {
-      res
+      return(res)
     }
   }
 
