@@ -78,9 +78,8 @@ Being an R6 object, `con` is flexible in the sense that you can change `url`, `u
 
 ```{r}
 con$reset_user("neo4j")
+con$reset_password("neo4j") 
 con$ping()
-# Or with 
-con$password <- "pouetpouet"
 ```
 
 That means you can connect to another url at any time without having to create a new connexion object. (`con$reset_url()`).
