@@ -12,7 +12,8 @@
 #' @importFrom R6 R6Class
 #' @importFrom httr GET status_code add_headers content
 #' @importFrom purrr map as_vector
-#' @importFrom dplyr as_tibble bind_rows tibble
+#' @importFrom tibble as_tibble tibble
+#' @importFrom data.table rbindlist
 #' @importFrom tidyr unnest
 #' @importFrom jsonlite base64_enc
 #' @export
@@ -45,6 +46,16 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            initialize = function(url, user, password){
                              #browser()
                              # Clean url in case it ends with a /
+                             if (grepl("bolt", url)){
+
+                               message("We've detected the pattern `bolt` in your url.")
+                               message("{neo4r} doesn't provide support for bolt")
+                               message("in the current version.")
+                               x <- readline("Do you wish to proceed anyway? [Y/n] ")
+                               if (x != "Y"){
+                                 stop("Stopped")
+                               }
+                             }
                              url <- gsub("(.*)/$", "\\1", url)
                              self$url <- url
                              self$user <- user
@@ -56,11 +67,11 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            },
                            reset_user = function(user){
                              self$user <- user
-                             self$auth <- base64_enc(paste0(user,':',self$password))
+                             self$auth <- base64_enc(paste0(self$user,':', self$password))
                            },
                            reset_password = function(password){
                              self$password <- password
-                             self$auth <- base64_enc(paste0(self$user,':',password))
+                             self$auth <- base64_enc(paste0(self$user,':', self$password))
                            },
                            # List elements
                            access = function(){
@@ -100,13 +111,13 @@ neo4j_api <- R6::R6Class("Neo4JAPI",
                            # There must be a better way to parse this
                            get_schema = function(){
                              res <- get_wrapper(self, "db/data/schema/index")
-                             map(content(res), as_tibble) %>% map(unnest) %>% bind_rows()
+                             map(content(res), as_tibble) %>% map(unnest) %>% rbindlist()
                            },
                            # Get a list of constraints registered in the db
                            # Same here
                            get_constraints = function(){
                              res <- get_wrapper(self, "db/data/schema/constraint")
-                             map(content(res), as_tibble) %>% map(unnest) %>% bind_rows()
+                             map(content(res), as_tibble) %>% map(unnest) %>% rbindlist()
                            }
 
                          )

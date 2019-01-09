@@ -4,9 +4,9 @@
 #' @param format the format (either igraph or visNetwork)
 #' @param label the column to be considered as the label columns
 #'
-#' @importFrom dplyr select enquo
+#' @importFrom rlang enquo
 #' @importFrom igraph graph_from_data_frame
-#' @importFrom tidyselect everything
+#' @importFrom tidyselect everything vars_select
 #'
 #' @return a transformed list
 #' @export
@@ -32,14 +32,15 @@ convert_to <- function(res, format = c("visNetwork", "igraph"),
 
     if (!is.null(res$nodes)){
       unnested_res$nodes <- unnest_nodes(res$nodes)
-      unnested_res$nodes <- select(unnested_res$nodes, id, name = !! lab, group = label, everything())
+      unnested_res$nodes <- unnested_res$nodes[, vars_select(names(unnested_res$nodes),
+                                                             id, !! lab, label, everything())]
     } else {
       unnested_res$nodes <- NULL
     }
 
     if (!is.null(res$relationships)){
-      unnested_res$relationships <- select(res$relationships, startNode,
-                                           endNode, type, id, properties)
+
+      unnested_res$relationships <- res$relationships[, c("startNode", "endNode", "type", "id", "properties")]
     } else {
       unnested_res$relationships <- NULL
     }

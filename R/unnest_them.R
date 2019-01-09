@@ -5,7 +5,7 @@
 #'
 #' @importFrom purrr map_df
 #' @importFrom tidyr unnest
-#' @importFrom dplyr as_tibble
+#' @importFrom tibble as_tibble
 #'
 #' @return a new dataframe
 #' @export

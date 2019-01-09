@@ -131,8 +131,6 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 
 }
 
-#' #' @importFrom dplyr as_tibble
-#' #' @importFrom attempt attempt
 #'
 #' try_to_tibble <- function(vec){
 #'   res <- attempt(as_tibble(vec), silent = TRUE)
@@ -151,9 +149,7 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 #'   }
 #' }
 #'
-#' #' @importFrom dplyr bind_cols
-#' #' @importFrom attempt attempt
-#'
+
 #' try_to_bind_cols <- function(vec){
 #'   res <- attempt(bind_cols(vec), silent = TRUE)
 #'   if (class(res)[1] == "try-error"){
@@ -163,8 +159,6 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 #'   }
 #' }
 #'
-#' #' @importFrom tidyr unnest
-#' #' @importFrom attempt attempt
 #'
 #' try_to_unnest <- function(vec){
 #'   res <- attempt(unnest(vec), silent = TRUE)
@@ -175,8 +169,6 @@ parse_api_results <- function(res, type, include_stats, meta, format){
 #'   }
 #' }
 #'
-#' #' @importFrom purrr transpose modify_depth discard map set_names
-#' #' @importFrom attempt attempt
 #'
 #' gather_row_meta <- function(x, list_names){
 #'   suppressWarnings(transpose(x)) %>%

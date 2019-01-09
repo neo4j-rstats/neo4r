@@ -6,7 +6,7 @@
 #' @export
 #'
 #' @importFrom purrr map_lgl as_vector map_chr
-#' @importFrom dplyr tibble
+#' @importFrom tibble tibble
 #'
 #' @examples
 #' \dontrun{
