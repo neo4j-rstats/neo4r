@@ -55,7 +55,7 @@ call_neo4j <- function(query, con,
 
   # Transform the query to a Neo4J JSON format
   query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
-  # Unfortunately I was not able to programmatically convert everything to JSON ¯\_(ツ)_/¯
+  # Unfortunately I was not able to programmatically convert everything to JSON
   body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
 
   # Calling the API

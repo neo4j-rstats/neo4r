@@ -113,14 +113,14 @@ The `call_neo4j()` function takes several arguments :
 
 + `query` : the cypher query
 + `con` : the connexion object 
-+ `type` : "rows" or "graph": wether to return the results as a list of results in tibble, or as a graph object (with `$nodes` and `$relationships`)
++ `type` : "rows" or "graph": whether to return the results as a list of results in tibble, or as a graph object (with `$nodes` and `$relationships`)
 + `output` : the output format (R or json) 
 + `include_stats` : whether or not to include the stats about the call 
-+ `meta` : wether or not to include the meta arguments of the nodes when calling with "rows"
++ `meta` : whether or not to include the meta arguments of the nodes when calling with "rows"
 
 ### "rows" format
 
-The user chooses wether or not to return a list of tibbles when calling the API. You get as many objects as specified in the RETURN cypher statement. 
+The user chooses whether or not to return a list of tibbles when calling the API. You get as many objects as specified in the RETURN cypher statement. 
 
 ```{r}
 library(magrittr)
@@ -304,7 +304,7 @@ The args are :
 + `on_load` : the code to execute on load 
 + `con` : the connexion object 
 + `url` : the url of the csv to send
-+ `header` : wether or not the csv has a header
++ `header` : whether or not the csv has a header
 + `periodic_commit` : the volume for PERIODIC COMMIT
 + `as` : the AS argument for LOAD CSV
 + `format` : the format of the result 

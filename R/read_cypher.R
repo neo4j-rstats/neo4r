@@ -34,8 +34,8 @@ read_cypher <- function(file) {
 #' @param con a connexion object created with neo4j_api$new()
 #' @param type the type of the format to query for (row or graph)
 #' @param output the printing method (r or json)
-#' @param include_stats wether of not to include stats
-#' @param meta wether of not to include meta info
+#' @param include_stats whether of not to include stats
+#' @param meta whether of not to include meta info
 #' @return a cypher call
 #' @export
 #'
