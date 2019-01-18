@@ -1,64 +1,89 @@
-clean_query <- function(query){
+clean_query <- function(query) {
   res <- gsub("^\\/\\/.+$", "\n", query, perl = TRUE)
   res <- gsub("\n", " ", res)
   res <- gsub("\"", "'", res)
   res
 }
 
-to_json_neo <- function(query, include_stats, meta, type){
-  toJSON(list(statement = query, includeStats = include_stats, meta = meta, resultDataContents = list(type)), auto_unbox = TRUE)
+#' @importFrom jsonlite toJSON
 
+to_json_neo <- function(query, include_stats, meta, type) {
+  toJSON(
+    list(
+      statement = query,
+      includeStats = include_stats,
+      meta = meta,
+      resultDataContents = list(type)
+    ),
+    auto_unbox = TRUE
+  )
 }
 
-#' Call the api
+#' Call Neo4J API
 #'
-#' @param query the cypher query
-#' @param con the connexion object
+#' @param query The cypher query
+#' @param con A NEO4JAPI connection object
+#' @param type Return the result as row or as graph
+#' @param output Use "json" if you want the output to be printed as JSON
+#' @param include_stats tShould the stats about the transaction be included?
+#' @param include_meta tShould the stats about the transaction be included?
 #'
-#' @importFrom attempt stop_if_not
-#' @importFrom jsonlite base64_enc toJSON
-#' @importFrom httr POST content add_headers status_code
 #' @importFrom glue glue
+#' @importFrom attempt stop_if_not
+#' @importFrom httr POST status_code add_headers
 #'
 #' @return the result from the Neo4J Call
 #' @export
-#'
-#' @examples
-#'
-call_api <- function(query, con, type = c("row","graph"), output = c("r", "json"),
-                     include_stats = FALSE, meta = FALSE){
-  #browser()
 
+call_neo4j <- function(query, con,
+                       type = c("row", "graph"),
+                       output = c("r", "json"),
+                       include_stats = FALSE,
+                       include_meta = FALSE) {
+  # browser()
+  stop_if_not(
+    con, ~"Neo4JAPI" %in% class(.x),
+    "Please use a Neo4JAPI object."
+  )
   # Ensure the inputs are the one we expect
   output <- match.arg(output)
-  #format <- match.arg(format)
+  # format <- match.arg(format)
   type <- match.arg(type)
 
   # Clean the query to prevent weird mess up with " and stuffs
   query_clean <- clean_query(query)
 
   # Transform the query to a Neo4J JSON format
-  query_jsonised <- to_json_neo(query_clean, include_stats, meta, type)
+  query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
   # Unfortunately I was not able to programmatically convert everything to JSON ¯\_(ツ)_/¯
   body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
 
   # Calling the API
-  res <- POST(url = glue("{con$url}/db/data/transaction/commit?includeStats=true"),
-              add_headers(.headers = c("Content-Type"="application/json",
-                                       "accept"="application/json",
-                                       #"X-Stream" = "true",
-                                       "Authorization"= paste0("Basic ", con$auth))),
-              body = body)
+  res <- POST(
+    url = glue("{con$url}/db/data/transaction/commit?includeStats=true"),
+    add_headers(.headers = c(
+      "Content-Type" = "application/json",
+      "accept" = "application/json",
+      # "X-Stream" = "true",
+      "Authorization" = paste0("Basic ", con$auth)
+    )),
+    body = body
+  )
 
   # Verify the status code is 200
-  stop_if_not(status_code(res), ~ .x == 200, "API error")
-  #return(res)
+  stop_if_not(status_code(res), ~.x == 200, "API error")
+  # return(res)
 
   # Return the parsed output, to json or to R
-  if (output == "json"){
+  if (output == "json") {
     toJSON(lapply(content(res)$results, function(x) x$data), pretty = TRUE)
   } else {
-    parse_api_results(res = res, type = type, format = format, include_stats = include_stats, meta = meta)
+    parse_api_results(
+      res = res,
+      type = type, format = format,
+      include_stats = include_stats,
+      meta = include_meta
+    )
   }
 }
 

@@ -1,49 +1,5 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
-language: r
-# see also https://docs.travis-ci.com/user/languages/r
-
-# see also https://docs.travis-ci.com/user/multi-os/
-# You will need to set sudo: false in order to use the container based builds
-# and package caching.
-
-# Using the package cache to store R package dependencies can significantly
-# speed up build times and is recommended for most builds.
-cache:
-  - packages
-
-sudo: required
-
-dist: trusty
-
-addons:
-  apt:
-    packages:
-      - default-jre
-      - systemd
-
-before_install:
-  - wget -O - https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
-  - echo 'deb https://debian.neo4j.org/repo stable/' | sudo tee /etc/apt/sources.list.d/neo4j.list
-  - sudo apt-get update
-  - sudo apt-get install neo4j
-  - sudo service neo4j start
-  - sudo service neo4j status | cat
-
-r_packages:
-  - roxygen2
-
-script:
-  - R CMD build . --no-build-vignettes --no-manual
-  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - R -e 'devtools::check()'
-  - R -e 'devtools::test()'
-  - R -e 'devtools::document()'
-  - R CMD INSTALL "${PKG_FILE_NAME}"
-
-warnings_are_errors: false
-
-notifications:
-  email:
-    on_success: change
-    on_failure: change
+language: R
+sudo: false
+cache: packages

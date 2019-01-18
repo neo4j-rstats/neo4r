@@ -6,16 +6,16 @@
 #' @export
 #'
 #' @importFrom purrr map_lgl as_vector map_chr
-#' @importFrom dplyr tibble
+#' @importFrom tibble tibble
 #'
 #' @examples
 #' \dontrun{
 #' read_cypher("random/create.cypher")
 #' }
 
-read_cypher <- function(file){
+read_cypher <- function(file) {
   res <- readLines(file)
-  where <- map_lgl(res, ~ grepl("//", .x))
+  where <- map_lgl(res, ~grepl("//", .x))
   res <- res[!where]
   res <- paste(res, sep = "", collapse = " ")
   res <- gsub(";", ";%", res)
@@ -24,7 +24,7 @@ read_cypher <- function(file){
   res <- map_chr(cypher, clean_query)
   cypher <- gsub("^ *", "", cypher)
   tbl <- tibble(cypher = cypher)
-  class(tbl) <- c("cypher",class(tbl))
+  class(tbl) <- c("cypher", class(tbl))
   tbl
 }
 
@@ -45,12 +45,12 @@ read_cypher <- function(file){
 #' path <- "data-raw/constraints.cypher"
 #' }
 
-send_cypher <- function(path, con, type = c("row","graph"), output = c("r", "json"),
-                          include_stats = TRUE, meta = FALSE){
+send_cypher <- function(path, con, type = c("row", "graph"), output = c("r", "json"),
+                        include_stats = TRUE, meta = FALSE) {
   type <- match.arg(type)
   output <- match.arg(output)
   res <- read_cypher(path)
-  map(res$cypher, ~ call_api(.x, con, type, output, include_stats, meta))
+  map(res$cypher, ~call_neo4j(.x, con, type, output, include_stats, meta))
 }
 
 # con <- neo4r::neo4j_api$new(url = "http://localhost:7474", user = "neo4j",
@@ -58,5 +58,4 @@ send_cypher <- function(path, con, type = c("row","graph"), output = c("r", "jso
 # con$ping()
 
 # read_cypher("random/create.cypher")
-#cypher_script_to_api("random/create.cypher", con, type = "row")
-
+# cypher_script_to_api("random/create.cypher", con, type = "row")

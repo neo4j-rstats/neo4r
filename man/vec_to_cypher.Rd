@@ -13,6 +13,8 @@ vec_to_cypher_with_var(vec, label, variable)
 \item{vec}{the vector}
 
 \item{label}{the label of each vector}
+
+\item{variable}{the variable to use (for `vec_to_cypher()`)}
 }
 \value{
 a character vector

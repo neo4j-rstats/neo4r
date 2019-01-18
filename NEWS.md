@@ -1,3 +1,8 @@
-# cypher 0.0.0.9000
+# neo4r
 
-* Added a `NEWS.md` file to track changes to the package.
+# Version 0.1.0
+
+## Breaking change from the dev version 
+
++ `call_api()` is now called `call_neo4j()`
++ `meta` is now called `include_meta` for consistency with `include_stats`

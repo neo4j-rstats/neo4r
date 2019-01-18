@@ -6,12 +6,13 @@
 \usage{
 load_csv(on_load = "", con, url, header = TRUE,
   periodic_commit = 1000, as = "csv", type = c("row", "graph"),
-  output = c("r", "json"), include_stats = TRUE, meta = FALSE)
+  output = c("r", "json"), include_stats = TRUE,
+  include_meta = FALSE)
 }
 \arguments{
 \item{on_load}{the code to execute on load}
 
-\item{con}{the connexion object}
+\item{con}{A NEO4JAPI connection object}
 
 \item{url}{the url of the csv}
 
@@ -21,9 +22,13 @@ load_csv(on_load = "", con, url, header = TRUE,
 
 \item{as}{the AS cypher arg}
 
-\item{meta}{should the result include meta ?}
+\item{type}{Return the result as row or as graph}
 
-\item{format}{the format to return}
+\item{output}{Use "json" if you want the output to be printed as JSON}
+
+\item{include_stats}{tShould the stats about the transaction be included?}
+
+\item{include_meta}{tShould the stats about the transaction be included?}
 }
 \value{
 a csv loaded to Neo4J
