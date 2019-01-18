@@ -7,13 +7,13 @@
 #' @rdname extract
 #'
 
-extract_nodes <- function(x){
+extract_nodes <- function(x) {
   x$nodes
 }
 
 #' @export
 #' @rdname extract
 
-extract_relationships <- function(x){
+extract_relationships <- function(x) {
   x$relationships
 }

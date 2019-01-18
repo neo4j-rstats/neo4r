@@ -4,4 +4,5 @@
 
 ## Breaking change from the dev version 
 
-+ `call_api` is now called `call_neo4j`
++ `call_api()` is now called `call_neo4j()`
++ `meta` is now called `include_meta` for consistency with `include_stats`

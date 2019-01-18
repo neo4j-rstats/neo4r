@@ -686,10 +686,7 @@ RETURN t,w,l',
   )
 
   req_and_expect(
-    req = 'MATCH (t:Team)-[w:WIN]->(:Playoff)<-[l:WIN]-()
-RETURN t.Name as TEAM, SUM(w.Win) AS TOTAL_WIN, SUM(l.Win) as TOTAL_LOSS,
-(toFloat(SUM(w.Win)) / (toFloat(SUM(w.Win))+ toFloat(SUM(l.Win)))) as WIN_PERCENTAGE
-ORDER BY SUM(w.Win) DESC',
+    req = "MATCH (t:Team)-[w:WIN]->(:Playoff)<-[l:WIN]-()\nRETURN t.Name as TEAM, SUM(w.Win) AS TOTAL_WIN, SUM(l.Win) as TOTAL_LOSS,\n(toFloat(SUM(w.Win)) / (toFloat(SUM(w.Win))+ toFloat(SUM(l.Win)))) as WIN_PERCENTAGE\nORDER BY SUM(w.Win) DESC",
     con = con,
     is = "list",
     length = 4,
@@ -767,9 +764,8 @@ RETURN AVG(REDUCE(x = 0, a IN [i IN range(0,s) WHERE i % 2 = 0 | RArray[i] ] | x
   )
 
 
-#   req <- call_neo4j('MATCH p= AllShortestPaths((t1:Team {Name: "Golden State"})-[:WIN*0..14]-(t2:Team {Name:"Toronto"}))
-# WITH extract(r IN relationships(p)| r.Win) AS RArray, LENGTH(p)-1  as s
-# RETURN AVG(REDUCE(x = 0, a IN [i IN range(0,s) WHERE i % 2 = 0 | RArray[i] ] | x + a)) - AVG(REDUCE(x = 0, a IN [i IN range(0,s) WHERE i % 2 <> 0 | RArray[i] ] | x + a)) AS NET_WIN', con)
-#   req
+  #   req <- call_neo4j('MATCH p= AllShortestPaths((t1:Team {Name: "Golden State"})-[:WIN*0..14]-(t2:Team {Name:"Toronto"}))
+  # WITH extract(r IN relationships(p)| r.Win) AS RArray, LENGTH(p)-1  as s
+  # RETURN AVG(REDUCE(x = 0, a IN [i IN range(0,s) WHERE i % 2 = 0 | RArray[i] ] | x + a)) - AVG(REDUCE(x = 0, a IN [i IN range(0,s) WHERE i % 2 <> 0 | RArray[i] ] | x + a)) AS NET_WIN', con)
+  #   req
 })
-

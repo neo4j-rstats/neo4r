@@ -1,7 +1,9 @@
 library(neo4r)
-con <- neo4j_api$new(url = "http://localhost:7474",
-                     user = "neo4j",
-                     password = "neo4j")
+con <- neo4j_api$new(
+  url = "http://localhost:7474",
+  user = "neo4j",
+  password = "neo4j"
+)
 
 call_neo4j("CREATE CONSTRAINT ON (al:Band) ASSERT al.name IS UNIQUE;", con)
 call_neo4j("CREATE CONSTRAINT ON (al:City) ASSERT al.name IS UNIQUE;", con)
@@ -111,4 +113,3 @@ MERGE (emperor_rec)-[:WAS_RECORDED]->(emperor)
 MERGE (as_the_shadow)-[:WAS_RECORDED]->(emperor)
 MERGE (inthenightside)-[:WAS_RECORDED]->(emperor)
 MERGE (asorcery)-[:WAS_RECORDED]->(gorgoroth)", con)
-

@@ -27,6 +27,7 @@ Imports:
     R6,
     rlang,
     rstudioapi,
+    shiny,
     tibble,
     tidyr,
     tidyselect,

@@ -11,9 +11,9 @@
 #' @export
 #'
 
-unnest_nodes <- function(nodes_tbl, what = c("all","label","properties")){
+unnest_nodes <- function(nodes_tbl, what = c("all", "label", "properties")) {
   what <- match.arg(what)
-  if (what == "label"){
+  if (what == "label") {
     res <- unnest(nodes_tbl, label, .drop = FALSE)
   } else if (what == "properties") {
     df <- map_df(nodes_tbl$properties, as_tibble)
@@ -29,8 +29,8 @@ unnest_nodes <- function(nodes_tbl, what = c("all","label","properties")){
 # nodes_tbl <- res$nodes
 # unnest(nodes_tbl, label)
 
-na_or_self <- function(x){
-  if(length(x) == 0) return(NA)
+na_or_self <- function(x) {
+  if (length(x) == 0) return(NA)
   x
 }
 
@@ -44,7 +44,7 @@ na_or_self <- function(x){
 #' @export
 #'
 
-unnest_relationships <- function(relationships_tbl){
+unnest_relationships <- function(relationships_tbl) {
   relationships_tbl$properties <- map_chr(relationships_tbl$properties, na_or_self)
   unnest(relationships_tbl, properties)
 }
@@ -57,9 +57,8 @@ unnest_relationships <- function(relationships_tbl){
 #' @export
 #'
 
-unnest_graph <- function(res){
+unnest_graph <- function(res) {
   res$nodes <- unnest_nodes(res$nodes)
   res$relationships <- unnest_relationships(res$relationships)
   res
 }
-

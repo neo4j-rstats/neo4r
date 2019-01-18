@@ -1,3 +1,8 @@
+^tests_ignore$
+^README\.Rmd$
+^data-raw$
+^README$
+^CODE_OF_CONDUCT\.md$
 ^readmefigs$
 ^.*\.Rproj$
 ^\.Rproj\.user$

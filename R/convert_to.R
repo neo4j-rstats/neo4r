@@ -13,8 +13,9 @@
 #'
 
 convert_to <- function(res, format = c("visNetwork", "igraph"),
-                       label = name){
-  if (format == "visNetwork"){
+                       label = name) {
+  format <- match.arg(format)
+  if (format == "visNetwork") {
     lab <- deparse(substitute(label))
     nodes <- unnest_nodes(res$nodes)
     rel <- unnest_relationships(res$relationships)
@@ -26,33 +27,35 @@ convert_to <- function(res, format = c("visNetwork", "igraph"),
     return(list(nodes = nodes, relationships = rel))
   }
 
-  if (format == "igraph"){
+  if (format == "igraph") {
     lab <- enquo(label)
     unnested_res <- list()
 
-    if (!is.null(res$nodes)){
+    if (!is.null(res$nodes)) {
       unnested_res$nodes <- unnest_nodes(res$nodes)
-      unnested_res$nodes <- unnested_res$nodes[, vars_select(names(unnested_res$nodes),
-                                                             id, !! lab, label, everything())]
+      unnested_res$nodes <- unnested_res$nodes[, vars_select(
+        names(unnested_res$nodes),
+        id, !!lab, label, everything()
+      )]
     } else {
       unnested_res$nodes <- NULL
     }
 
-    if (!is.null(res$relationships)){
-
+    if (!is.null(res$relationships)) {
       unnested_res$relationships <- res$relationships[, c("startNode", "endNode", "type", "id", "properties")]
     } else {
       unnested_res$relationships <- NULL
     }
 
-    graph_from_data_frame(d = unnested_res$relationships,
-                          directed = TRUE,
-                          vertices = unnested_res$nodes)
-
+    graph_from_data_frame(
+      d = unnested_res$relationships,
+      directed = TRUE,
+      vertices = unnested_res$nodes
+    )
   }
 }
 
-parse_node <- function(df){
+parse_node <- function(df) {
   id <- df$id
   label <- unnest(df[, "label"])
   properties <- as.data.frame(unlist(df[, "properties"]))

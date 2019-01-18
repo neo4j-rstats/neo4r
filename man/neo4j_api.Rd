@@ -16,10 +16,24 @@ A Neo4J Connexion
 }
 \section{Methods}{
 
-\describe{ \item{\code{access}}{list url, user and
-  password} \item{\code{ping}}{test your connexion}
-  \item{\code{version}}{Neo4J version} \item{\code{get}}{Get a list of either
-  relationship, labels, } }
+\describe{
+\item{\code{access}}{list url, user and password}
+\item{\code{ping}}{test your connexion}
+\item{\code{version}}{Neo4J version}
+\item{\code{get}}{Get a list of either relationship, labels, }
+\item{\code{get}}{Get a list of either relationship, labels, }
+\item{\code{get}}{Get a list of either relationship, labels, }
+\item{\code{get}}{Get a list of either relationship, labels, }
+\item{\code{get}}{Get a list of either relationship, labels, }
+}
+}
+
+\section{Data}{
+
+\describe{
+\item{\code{url}}{list url, user and password}
+\item{\code{user}}{test your connexion}
+}
 }
 
 \examples{

@@ -17,7 +17,7 @@ my_desc <- description$new("!new")
 # Set your package name
 my_desc$set("Package", "neo4r")
 
-#Set your name
+# Set your name
 my_desc$set("Authors@R", "person('Colin', 'Fay', email = 'colin@thinkr.fr', role = c('cre', 'aut'))")
 
 # Remove some author fields
@@ -66,3 +66,5 @@ use_package("data.table")
 use_package("tibble")
 use_package("rlang")
 use_tidy_description()
+
+usethis::use_test("as")

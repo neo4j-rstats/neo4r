@@ -1,6 +1,5 @@
 req_and_expect <- function(
-  req, con, is, length, names
-){
+                           req, con, is, length, names) {
   req <- call_neo4j(req, con)
   expect_is(req, is)
   expect_length(req, length)
@@ -8,8 +7,7 @@ req_and_expect <- function(
 }
 
 req_and_expect_graph <- function(
-  req, con
-){
+                                 req, con) {
   req <- call_neo4j(req, con, type = "graph")
   expect_is(req, "neo")
   expect_is(req, "list")
@@ -18,3 +16,4 @@ req_and_expect_graph <- function(
   expect_is(req$nodes, "data.frame")
   expect_is(req$relationships, "data.frame")
 }
+

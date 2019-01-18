@@ -37,3 +37,23 @@ test_that("queries graphs works", {
   expect_equal(names(graph[[1]]), c("id", "label", "properties"))
   expect_equal(names(graph[[2]]), c("id", "type", "startNode", "endNode", "properties"))
 })
+
+test_that("meta and stats works", {
+  graph <- "MATCH (r:Band) -[f:IS_FROM] -> (c:City {name:'Oslo'}) RETURN *;" %>%
+    call_neo4j(con, type = "graph", include_stats = TRUE)
+  expect_is(graph, "neo")
+  expect_is(graph, "list")
+  expect_length(graph, 3)
+  expect_equal(nrow(graph$stats), 12)
+  expect_equal(ncol(graph$stats), 2)
+  expect_equal(names(graph$stats), c("type", "value"))
+
+  graph <- "MATCH (r:Band) -[f:IS_FROM] -> (c:City {name:'Oslo'}) RETURN *;" %>%
+    call_neo4j(con, include_meta = TRUE)
+  expect_is(graph, "neo")
+  expect_is(graph, "list")
+  expect_length(graph, 6)
+  expect_equal(names(graph), c("c", "f", "r", "c_meta", "f_meta", "r_meta"))
+
+
+})
