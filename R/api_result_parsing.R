@@ -58,11 +58,12 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
     # Special case for handling arrays
     # browser()
     res <- attempt::attempt({
-      flatten(res_data) %>%
-        transpose() %>%
-        map(flatten_dfr)
+      purrr::map_depth(res_data, 3, tibble::as_tibble) %>%
+        purrr::map(purrr::flatten) %>%
+        purrr::transpose() %>%
+        purrr::map(rbindlist_to_tibble)
     }, silent = TRUE)
-    if (class(res) == "try-error") {
+    if (class(res)[1] == "try-error") {
       res <- flatten(res_data) %>%
         purrr::map_dfr(purrr::flatten_dfc) %>%
         list()
@@ -138,6 +139,11 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
     }
     res
   }
+}
+
+
+rbindlist_to_tibble <- function(l){
+  tibble::as_tibble(data.table::rbindlist(l))
 }
 
 #'

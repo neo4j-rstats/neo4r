@@ -242,7 +242,7 @@ library(ggraph)
   call_neo4j(con, type = "graph") %>% 
   convert_to("igraph") %>%
   ggraph() + 
-  geom_node_label(aes(label = name, color = group)) +
+  geom_node_label(aes(label = name)) +
   geom_edge_link() + 
   theme_graph()
 ```
