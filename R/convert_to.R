@@ -42,6 +42,7 @@ convert_to <- function(res, format = c("visNetwork", "igraph"),
     }
 
     if (!is.null(res$relationships)) {
+      res$relationships <- unnest_relationships(res$relationships)
       unnested_res$relationships <- res$relationships[, c("startNode", "endNode", "type", "id", "properties")]
     } else {
       unnested_res$relationships <- NULL
