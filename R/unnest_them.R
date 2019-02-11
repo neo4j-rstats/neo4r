@@ -45,8 +45,13 @@ na_or_self <- function(x) {
 #'
 
 unnest_relationships <- function(relationships_tbl) {
-  relationships_tbl$properties <- map_chr(relationships_tbl$properties, na_or_self)
-  unnest(relationships_tbl, properties)
+  relationships_tbl$properties <- map(relationships_tbl$properties, na_or_self)
+  while (
+    any( map_chr(relationships_tbl, class) == "list" )
+  ) {
+    relationships_tbl <- unnest(relationships_tbl, properties)
+  }
+  relationships_tbl
 }
 
 #' Unnest both relationships and nodes
