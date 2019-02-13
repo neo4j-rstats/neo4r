@@ -88,38 +88,41 @@ con$get_version()
 # List constaints (if any)
 con$get_constraints()
 #>         label       type property_keys
-#> 1:       Band UNIQUENESS          name
-#> 2:       City UNIQUENESS          name
-#> 3:     record UNIQUENESS          name
-#> 4:     artist UNIQUENESS          name
-#> 5:    Package UNIQUENESS          name
-#> 6:     Author UNIQUENESS          name
-#> 7: Maintainer UNIQUENESS          name
+#> 1:     artist UNIQUENESS          name
+#> 2: Maintainer UNIQUENESS          name
+#> 3:       Band UNIQUENESS          name
+#> 4:       City UNIQUENESS          name
+#> 5:     record UNIQUENESS          name
+#> 6:    Package UNIQUENESS          name
+#> 7:     Author UNIQUENESS          name
 # Get a vector of labels (if any)
 con$get_labels()
-#> # A tibble: 17 x 1
+#> # A tibble: 20 x 1
 #>    labels     
 #>    <chr>      
-#>  1 album      
-#>  2 GrandPrix  
+#>  1 record     
+#>  2 Driver     
 #>  3 Engine     
-#>  4 E          
-#>  5 W          
-#>  6 Playoff    
-#>  7 Author     
-#>  8 record     
-#>  9 Country    
-#> 10 Maintainer 
-#> 11 Driver     
-#> 12 Band       
-#> 13 Constructor
-#> 14 City       
-#> 15 Team       
-#> 16 Package    
-#> 17 artist
+#>  4 Constructor
+#>  5 Band       
+#>  6 Team       
+#>  7 Person     
+#>  8 Movie      
+#>  9 album      
+#> 10 Package    
+#> 11 W          
+#> 12 Author     
+#> 13 City       
+#> 14 GrandPrix  
+#> 15 E          
+#> 16 artist     
+#> 17 Test       
+#> 18 Playoff    
+#> 19 Country    
+#> 20 Maintainer
 # Get a vector of relationships (if any)
 con$get_relationships()
-#> # A tibble: 10 x 1
+#> # A tibble: 16 x 1
 #>    labels        
 #>    <chr>         
 #>  1 PLAYED_IN     
@@ -131,7 +134,13 @@ con$get_relationships()
 #>  7 BELONGS_TO    
 #>  8 BELONGED_TO   
 #>  9 FINISHED      
-#> 10 has_recorded
+#> 10 has_recorded  
+#> 11 ACTED_IN      
+#> 12 DIRECTED      
+#> 13 PRODUCED      
+#> 14 WROTE         
+#> 15 FOLLOWS       
+#> 16 REVIEWED
 # Get schema 
 con$get_schema()
 #>         label property_keys
@@ -316,7 +325,7 @@ res <- 'MATCH (r:record) -[w:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RET
   call_neo4j(con, type = "graph")
 unnest_nodes(res$nodes)
 #> # A tibble: 17 x 5
-#>    id    label  release name                          formed
+#>    id    value  release name                          formed
 #>    <chr> <chr>    <int> <chr>                          <int>
 #>  1 13608 record    1992 Hvis lyset tar oss                NA
 #>  2 12591 Band        NA Burzum                          1991
@@ -376,7 +385,7 @@ res$nodes %>%
 res$nodes %>%
   unnest_nodes(what = "label")
 #> # A tibble: 17 x 3
-#>    id    properties label 
+#>    id    properties value 
 #>    <chr> <list>     <chr> 
 #>  1 13608 <list [2]> record
 #>  2 12591 <list [2]> Band  
@@ -405,22 +414,22 @@ function is quite straightforward :
 ``` r
 unnest_relationships(res$relationships)
 #> # A tibble: 14 x 5
-#>    id    type         startNode endNode properties
-#>    <chr> <chr>        <chr>     <chr>   <chr>     
-#>  1 21824 WAS_RECORDED 13608     12591   <NA>      
-#>  2 21825 WAS_RECORDED 13613     12591   <NA>      
-#>  3 21819 WAS_RECORDED 13594     12591   <NA>      
-#>  4 21823 WAS_RECORDED 13606     12591   <NA>      
-#>  5 21822 WAS_RECORDED 13600     12591   <NA>      
-#>  6 21821 WAS_RECORDED 13599     12591   <NA>      
-#>  7 21820 WAS_RECORDED 13597     12591   <NA>      
-#>  8 21832 WAS_RECORDED 13598     12595   <NA>      
-#>  9 21833 WAS_RECORDED 13604     12595   <NA>      
-#> 10 21834 WAS_RECORDED 13610     12595   <NA>      
-#> 11 21835 WAS_RECORDED 13615     12595   <NA>      
-#> 12 21829 WAS_RECORDED 13596     12598   <NA>      
-#> 13 21830 WAS_RECORDED 13601     12598   <NA>      
-#> 14 21831 WAS_RECORDED 13621     12598   <NA>
+#>    id    type         startNode endNode value
+#>    <chr> <chr>        <chr>     <chr>   <lgl>
+#>  1 21824 WAS_RECORDED 13608     12591   NA   
+#>  2 21825 WAS_RECORDED 13613     12591   NA   
+#>  3 21819 WAS_RECORDED 13594     12591   NA   
+#>  4 21823 WAS_RECORDED 13606     12591   NA   
+#>  5 21822 WAS_RECORDED 13600     12591   NA   
+#>  6 21821 WAS_RECORDED 13599     12591   NA   
+#>  7 21820 WAS_RECORDED 13597     12591   NA   
+#>  8 21832 WAS_RECORDED 13598     12595   NA   
+#>  9 21833 WAS_RECORDED 13604     12595   NA   
+#> 10 21834 WAS_RECORDED 13610     12595   NA   
+#> 11 21835 WAS_RECORDED 13615     12595   NA   
+#> 12 21829 WAS_RECORDED 13596     12598   NA   
+#> 13 21830 WAS_RECORDED 13601     12598   NA   
+#> 14 21831 WAS_RECORDED 13621     12598   NA
 ```
 
   - `unnest_graph`
@@ -432,7 +441,7 @@ This function takes a graph results, and does `unnest_nodes` and
 unnest_graph(res)
 #> $nodes
 #> # A tibble: 17 x 5
-#>    id    label  release name                          formed
+#>    id    value  release name                          formed
 #>    <chr> <chr>    <int> <chr>                          <int>
 #>  1 13608 record    1992 Hvis lyset tar oss                NA
 #>  2 12591 Band        NA Burzum                          1991
@@ -454,22 +463,22 @@ unnest_graph(res)
 #> 
 #> $relationships
 #> # A tibble: 14 x 5
-#>    id    type         startNode endNode properties
-#>    <chr> <chr>        <chr>     <chr>   <chr>     
-#>  1 21824 WAS_RECORDED 13608     12591   <NA>      
-#>  2 21825 WAS_RECORDED 13613     12591   <NA>      
-#>  3 21819 WAS_RECORDED 13594     12591   <NA>      
-#>  4 21823 WAS_RECORDED 13606     12591   <NA>      
-#>  5 21822 WAS_RECORDED 13600     12591   <NA>      
-#>  6 21821 WAS_RECORDED 13599     12591   <NA>      
-#>  7 21820 WAS_RECORDED 13597     12591   <NA>      
-#>  8 21832 WAS_RECORDED 13598     12595   <NA>      
-#>  9 21833 WAS_RECORDED 13604     12595   <NA>      
-#> 10 21834 WAS_RECORDED 13610     12595   <NA>      
-#> 11 21835 WAS_RECORDED 13615     12595   <NA>      
-#> 12 21829 WAS_RECORDED 13596     12598   <NA>      
-#> 13 21830 WAS_RECORDED 13601     12598   <NA>      
-#> 14 21831 WAS_RECORDED 13621     12598   <NA>      
+#>    id    type         startNode endNode value
+#>    <chr> <chr>        <chr>     <chr>   <lgl>
+#>  1 21824 WAS_RECORDED 13608     12591   NA   
+#>  2 21825 WAS_RECORDED 13613     12591   NA   
+#>  3 21819 WAS_RECORDED 13594     12591   NA   
+#>  4 21823 WAS_RECORDED 13606     12591   NA   
+#>  5 21822 WAS_RECORDED 13600     12591   NA   
+#>  6 21821 WAS_RECORDED 13599     12591   NA   
+#>  7 21820 WAS_RECORDED 13597     12591   NA   
+#>  8 21832 WAS_RECORDED 13598     12595   NA   
+#>  9 21833 WAS_RECORDED 13604     12595   NA   
+#> 10 21834 WAS_RECORDED 13610     12595   NA   
+#> 11 21835 WAS_RECORDED 13615     12595   NA   
+#> 12 21829 WAS_RECORDED 13596     12598   NA   
+#> 13 21830 WAS_RECORDED 13601     12598   NA   
+#> 14 21831 WAS_RECORDED 13621     12598   NA   
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -528,10 +537,10 @@ In order to be converted into a graph object:
 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
   call_neo4j(con, type = "graph") %>%
   convert_to("igraph")
-#> IGRAPH dab6b48 DN-- 6 5 -- 
-#> + attr: name (v/c), label (v/c), release (v/n), formed (v/n), type
-#> | (e/c), id (e/c), properties (e/x)
-#> + edges from dab6b48 (vertex names):
+#> IGRAPH f607d94 DN-- 6 5 -- 
+#> + attr: name (v/c), value (v/c), release (v/n), formed (v/n), type
+#> | (e/c), id (e/c), value (e/l)
+#> + edges from f607d94 (vertex names):
 #> [1] Hvis lyset tar oss->Burzum Filosofem         ->Burzum
 #> [3] Demo I            ->Burzum Aske              ->Burzum
 #> [5] Det som engang var->Burzum
@@ -662,13 +671,13 @@ call_neo4j("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
 # List constaints (if any)
 con$get_constraints()
 #>         label       type property_keys
-#> 1:       Band UNIQUENESS          name
-#> 2:       City UNIQUENESS          name
-#> 3:     record UNIQUENESS          name
-#> 4:     artist UNIQUENESS          name
-#> 5:    Package UNIQUENESS          name
-#> 6:     Author UNIQUENESS          name
-#> 7: Maintainer UNIQUENESS          name
+#> 1:     artist UNIQUENESS          name
+#> 2: Maintainer UNIQUENESS          name
+#> 3:       Band UNIQUENESS          name
+#> 4:       City UNIQUENESS          name
+#> 5:     record UNIQUENESS          name
+#> 6:    Package UNIQUENESS          name
+#> 7:     Author UNIQUENESS          name
 # Create the query that will create the nodes and relationships
 on_load_query <- 'MERGE (a:artist { name: csvLine.artist})
 MERGE (al:album {name: csvLine.album_name})
@@ -692,7 +701,7 @@ load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tr
 #>  8 Bag Raiders    
 #>  9 Bright Eyes    
 #> 10 Bob Dylan      
-#> # ... with 2,357 more rows
+#> # … with 2,357 more rows
 #> 
 #> $albums
 #> # A tibble: 2,367 x 1
@@ -708,7 +717,7 @@ load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tr
 #>  8 Bag Raiders (Deluxe)           
 #>  9 I'm Wide Awake, It's Morning   
 #> 10 Highway 61 Revisited           
-#> # ... with 2,357 more rows
+#> # … with 2,357 more rows
 #> 
 #> $stats
 #> # A tibble: 12 x 2
