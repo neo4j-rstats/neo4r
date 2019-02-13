@@ -2,7 +2,7 @@ context("test-query")
 
 test_that("constraints works", {
   cons <- con$get_constraints()
-  expect_equal(nrow(cons), 4)
+  expect_equal(nrow(cons), 7)
   expect_equal(ncol(cons), 3)
   expect_equal(names(cons), c("label", "type", "property_keys"))
 })
