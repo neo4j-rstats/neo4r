@@ -21,7 +21,8 @@ close_connection <- function() {
 on_connection_closed <- function() {
   observer <- getOption("connectionObserver")
   if (!is.null(observer)) {
-    observer$connectionClosed(type = "Neo4J", host = "neo4jhost")
+    observer$connectionClosed(type = "Neo4J",
+                              host = "neo4jhost")
   }
 }
 
