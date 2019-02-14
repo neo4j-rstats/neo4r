@@ -7,10 +7,11 @@ clean_query <- function(query) {
 
 #' @importFrom jsonlite toJSON
 
-to_json_neo <- function(query, include_stats, meta, type) {
+to_json_neo <- function(query, params, include_stats, meta, type) {
   toJSON(
     list(
       statement = query,
+      params = params,
       includeStats = include_stats,
       meta = meta,
       resultDataContents = list(type)
@@ -36,6 +37,7 @@ to_json_neo <- function(query, include_stats, meta, type) {
 #' @export
 
 call_neo4j <- function(query, con,
+                       params = NULL,
                        type = c("row", "graph"),
                        output = c("r", "json"),
                        include_stats = FALSE,
@@ -54,7 +56,7 @@ call_neo4j <- function(query, con,
   query_clean <- clean_query(query)
 
   # Transform the query to a Neo4J JSON format
-  query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
+  query_jsonised <- to_json_neo(query_clean, params, include_stats, include_meta, type)
   # Unfortunately I was not able to programmatically convert everything to JSON
   body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
 
