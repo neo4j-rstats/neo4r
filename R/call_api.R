@@ -11,7 +11,7 @@ to_json_neo <- function(query, params, include_stats, meta, type) {
   toJSON(
     list(
       statement = query,
-      params = params,
+      parameters = params,
       includeStats = include_stats,
       meta = meta,
       resultDataContents = list(type)
@@ -23,6 +23,7 @@ to_json_neo <- function(query, params, include_stats, meta, type) {
 #' Call Neo4J API
 #'
 #' @param query The cypher query
+#' @param params Parameters to pass along the query
 #' @param con A NEO4JAPI connection object
 #' @param type Return the result as row or as graph
 #' @param output Use "json" if you want the output to be printed as JSON
