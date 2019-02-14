@@ -215,45 +215,98 @@ There are two convenient functions to extract nodes and relationships:
 
 In order to be converted into a graph object:
 
-+ nodes need an id, and a name. By default, node name is assumed to be found in the "name" property returned by the graph, specifying any other column is allowed. The "label" column from Neo4J is renamed "group".
++ The nodes should be a dataframe with the first column being a series of unique ID, understood as "names" by igraph - these are the ID columns from Neo4J. Other columns are considered attributes.  
 
 + relationships need a start and an end, *i.e.* startNode and endNode in the Neo4J results. 
 
-```{r}
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>%
-  convert_to("igraph")
-```
-
-Which means that you can : 
+Here how to create a graph object from a `{neo4r}` result:
 
 ```{r}
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>% 
-  convert_to("igraph") %>%
-  plot()
+G <- "MATCH a=(p:Person {name: 'Tom Hanks'})-[r:ACTED_IN]->(m:Movie) RETURN a;" %>% 
+  call_neo4j(con, type = "graph") 
+
+library(dplyr)
+library(purrr)
+# Create a dataframe with col 1 being the ID, 
+# And columns 2 being the names
+G$nodes <- G$nodes %>%
+  unnest_nodes(what = "properties") %>% 
+  # We're extracting the first label of each node, but 
+  # this column can also be removed if not needed
+  mutate(label = map_chr(label, 1))
+head(G$nodes)
 ```
+
+We then reorder the relationnship table:
+
+```{r}
+G$relationships <- G$relationships %>%
+  unnest_relationships() %>%
+  select(startNode, endNode, type, everything())
+head(G$relationships)
+```
+
+```{r}
+graph_object <- igraph::graph_from_data_frame(
+  d = G$relationships, 
+  directed = TRUE, 
+  vertices = G$nodes
+)
+plot(graph_object)
+```
+
 
 This can also be used with `{ggraph}` :
 
 ```{r}
 library(ggraph)
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>% 
-  convert_to("igraph") %>%
+graph_object %>%
   ggraph() + 
-  geom_node_label(aes(label = name)) +
+  geom_node_label(aes(label = label)) +
   geom_edge_link() + 
   theme_graph()
 ```
 
 ### {visNetwork}
 
+`{visNetwork}` expects the following format : 
+
+#### nodes	
+- "id" : id of the node, needed in edges information
+- "label" : label of the node
+- "group" : group of the node. Groups can be configure with visGroups
+- "value" : size of the node
+- "title" : tooltip of the node
+
+#### edges	
+- "from" : node id of begin of the edge
+- "to" : node id of end of the edge
+- "label" : label of the edge
+- "value" : size of the node
+- "title" : tooltip of the node
+
+(from `?visNetwork::visNetwork`).
+
+`visNetwork` is smart enough to transform a list column into several label, so we don't have to worry too much about this one. 
+
+Here's how to convert our `{neo4r}` result:
+
 ```{r eval = FALSE}
-network <- 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>% 
-  convert_to("visNetwork")
-visNetwork::visNetwork(network$nodes, network$relationships)
+G <-"MATCH a=(p:Person {name: 'Tom Hanks'})-[r:ACTED_IN]->(m:Movie) RETURN a;" %>% 
+  call_neo4j(con, type = "graph") 
+
+# We'll just unnest the properties
+G$nodes <- G$nodes %>%
+  unnest_nodes(what = "properties")
+head(G$nodes)  
+
+# Turn the relationships :
+G$relationships <- G$relationships %>%
+  unnest_relationships() %>%
+  select(from = startNode, to = endNode, label = type)
+head(G$relationships)
+
+visNetwork::visNetwork(G$nodes, G$relationships)
 ```
 
 

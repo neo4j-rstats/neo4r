@@ -97,50 +97,34 @@ con$get_constraints()
 #> 7:     Author UNIQUENESS          name
 # Get a vector of labels (if any)
 con$get_labels()
-#> # A tibble: 20 x 1
-#>    labels     
-#>    <chr>      
-#>  1 record     
-#>  2 Driver     
-#>  3 Engine     
-#>  4 Constructor
-#>  5 Band       
-#>  6 Team       
-#>  7 Person     
-#>  8 Movie      
-#>  9 album      
-#> 10 Package    
-#> 11 W          
-#> 12 Author     
-#> 13 City       
-#> 14 GrandPrix  
-#> 15 E          
-#> 16 artist     
-#> 17 Test       
-#> 18 Playoff    
-#> 19 Country    
-#> 20 Maintainer
+#> # A tibble: 10 x 1
+#>    labels    
+#>    <chr>     
+#>  1 City      
+#>  2 Band      
+#>  3 record    
+#>  4 Author    
+#>  5 Person    
+#>  6 Maintainer
+#>  7 album     
+#>  8 Package   
+#>  9 Movie     
+#> 10 artist
 # Get a vector of relationships (if any)
 con$get_relationships()
-#> # A tibble: 16 x 1
-#>    labels        
-#>    <chr>         
-#>  1 PLAYED_IN     
-#>  2 IS_FROM       
-#>  3 WAS_RECORDED  
-#>  4 WIN           
-#>  5 HAS           
-#>  6 COUNTRY_ORIGIN
-#>  7 BELONGS_TO    
-#>  8 BELONGED_TO   
-#>  9 FINISHED      
-#> 10 has_recorded  
-#> 11 ACTED_IN      
-#> 12 DIRECTED      
-#> 13 PRODUCED      
-#> 14 WROTE         
-#> 15 FOLLOWS       
-#> 16 REVIEWED
+#> # A tibble: 10 x 1
+#>    labels      
+#>    <chr>       
+#>  1 PLAYED_IN   
+#>  2 IS_FROM     
+#>  3 WAS_RECORDED
+#>  4 has_recorded
+#>  5 ACTED_IN    
+#>  6 DIRECTED    
+#>  7 PRODUCED    
+#>  8 WROTE       
+#>  9 FOLLOWS     
+#> 10 REVIEWED
 # Get schema 
 con$get_schema()
 #>         label property_keys
@@ -213,20 +197,20 @@ library(magrittr)
 #> # A tibble: 14 x 2
 #>    release name                         
 #>      <int> <chr>                        
-#>  1    1992 Hvis lyset tar oss           
-#>  2    1993 Filosofem                    
-#>  3    1991 Demo I                       
-#>  4    1992 Aske                         
-#>  5    1992 Det som engang var           
-#>  6    1992 Burzum                       
-#>  7    1991 Demo II                      
-#>  8    1991 Nema                         
-#>  9    1992 Yggdrasill                   
-#> 10    1992 Hordanes Land                
-#> 11    1993 Vikingligr Veldi             
-#> 12    1991 Immortal                     
-#> 13    1992 Diabolical Fullmoon Mysticism
-#> 14    1993 Pure Holocaust               
+#>  1    1993 Filosofem                    
+#>  2    1992 Hvis lyset tar oss           
+#>  3    1992 Aske                         
+#>  4    1992 Det som engang var           
+#>  5    1992 Burzum                       
+#>  6    1991 Demo II                      
+#>  7    1991 Demo I                       
+#>  8    1992 Hordanes Land                
+#>  9    1993 Vikingligr Veldi             
+#> 10    1991 Nema                         
+#> 11    1992 Yggdrasill                   
+#> 12    1992 Diabolical Fullmoon Mysticism
+#> 13    1993 Pure Holocaust               
+#> 14    1991 Immortal                     
 #> 
 #> attr(,"class")
 #> [1] "neo"  "neo"  "list"
@@ -256,18 +240,18 @@ JSON:
 #>           "formed": [1991]
 #>         },
 #>         {
-#>           "release": [1992],
-#>           "name": ["Hvis lyset tar oss"]
+#>           "release": [1993],
+#>           "name": ["Filosofem"]
 #>         }
 #>       ],
 #>       "meta": [
 #>         {
-#>           "id": [12591],
+#>           "id": [16020],
 #>           "type": ["node"],
 #>           "deleted": [false]
 #>         },
 #>         {
-#>           "id": [13608],
+#>           "id": [16058],
 #>           "type": ["node"],
 #>           "deleted": [false]
 #>         }
@@ -287,23 +271,23 @@ result:
 #> # A tibble: 17 x 3
 #>    id    label     properties
 #>    <chr> <list>    <list>    
-#>  1 13608 <chr [1]> <list [2]>
-#>  2 12591 <chr [1]> <list [2]>
-#>  3 13613 <chr [1]> <list [2]>
-#>  4 13594 <chr [1]> <list [2]>
-#>  5 13606 <chr [1]> <list [2]>
-#>  6 13600 <chr [1]> <list [2]>
-#>  7 13599 <chr [1]> <list [2]>
-#>  8 13597 <chr [1]> <list [2]>
-#>  9 12595 <chr [1]> <list [2]>
-#> 10 13598 <chr [1]> <list [2]>
-#> 11 13604 <chr [1]> <list [2]>
-#> 12 13610 <chr [1]> <list [2]>
-#> 13 13615 <chr [1]> <list [2]>
-#> 14 12598 <chr [1]> <list [2]>
-#> 15 13596 <chr [1]> <list [2]>
-#> 16 13601 <chr [1]> <list [2]>
-#> 17 13621 <chr [1]> <list [2]>
+#>  1 16020 <chr [1]> <list [2]>
+#>  2 16058 <chr [1]> <list [2]>
+#>  3 16053 <chr [1]> <list [2]>
+#>  4 16051 <chr [1]> <list [2]>
+#>  5 16045 <chr [1]> <list [2]>
+#>  6 16044 <chr [1]> <list [2]>
+#>  7 16042 <chr [1]> <list [2]>
+#>  8 16039 <chr [1]> <list [2]>
+#>  9 16055 <chr [1]> <list [2]>
+#> 10 16024 <chr [1]> <list [2]>
+#> 11 16060 <chr [1]> <list [2]>
+#> 12 16043 <chr [1]> <list [2]>
+#> 13 16049 <chr [1]> <list [2]>
+#> 14 16027 <chr [1]> <list [2]>
+#> 15 16046 <chr [1]> <list [2]>
+#> 16 16066 <chr [1]> <list [2]>
+#> 17 16041 <chr [1]> <list [2]>
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -325,25 +309,25 @@ res <- 'MATCH (r:record) -[w:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RET
   call_neo4j(con, type = "graph")
 unnest_nodes(res$nodes)
 #> # A tibble: 17 x 5
-#>    id    value  release name                          formed
-#>    <chr> <chr>    <int> <chr>                          <int>
-#>  1 13608 record    1992 Hvis lyset tar oss                NA
-#>  2 12591 Band        NA Burzum                          1991
-#>  3 13613 record    1993 Filosofem                         NA
-#>  4 13594 record    1991 Demo I                            NA
-#>  5 13606 record    1992 Aske                              NA
-#>  6 13600 record    1992 Det som engang var                NA
-#>  7 13599 record    1992 Burzum                            NA
-#>  8 13597 record    1991 Demo II                           NA
-#>  9 12595 Band        NA Enslaved                        1991
-#> 10 13598 record    1991 Nema                              NA
-#> 11 13604 record    1992 Yggdrasill                        NA
-#> 12 13610 record    1992 Hordanes Land                     NA
-#> 13 13615 record    1993 Vikingligr Veldi                  NA
-#> 14 12598 Band        NA Immortal                        1991
-#> 15 13596 record    1991 Immortal                          NA
-#> 16 13601 record    1992 Diabolical Fullmoon Mysticism     NA
-#> 17 13621 record    1993 Pure Holocaust                    NA
+#>    id    value  name                          formed release
+#>    <chr> <chr>  <chr>                          <int>   <int>
+#>  1 16020 Band   Burzum                          1991      NA
+#>  2 16058 record Filosofem                         NA    1993
+#>  3 16053 record Hvis lyset tar oss                NA    1992
+#>  4 16051 record Aske                              NA    1992
+#>  5 16045 record Det som engang var                NA    1992
+#>  6 16044 record Burzum                            NA    1992
+#>  7 16042 record Demo II                           NA    1991
+#>  8 16039 record Demo I                            NA    1991
+#>  9 16055 record Hordanes Land                     NA    1992
+#> 10 16024 Band   Enslaved                        1991      NA
+#> 11 16060 record Vikingligr Veldi                  NA    1993
+#> 12 16043 record Nema                              NA    1991
+#> 13 16049 record Yggdrasill                        NA    1992
+#> 14 16027 Band   Immortal                        1991      NA
+#> 15 16046 record Diabolical Fullmoon Mysticism     NA    1992
+#> 16 16066 record Pure Holocaust                    NA    1993
+#> 17 16041 record Immortal                          NA    1991
 ```
 
 Please, note that this function will return `NA` for the properties that
@@ -360,25 +344,25 @@ Also, it is possible to unnest either the properties or the labels :
 res$nodes %>%
   unnest_nodes(what = "properties")
 #> # A tibble: 17 x 5
-#>    id    label     release name                          formed
-#>    <chr> <list>      <int> <chr>                          <int>
-#>  1 13608 <chr [1]>    1992 Hvis lyset tar oss                NA
-#>  2 12591 <chr [1]>      NA Burzum                          1991
-#>  3 13613 <chr [1]>    1993 Filosofem                         NA
-#>  4 13594 <chr [1]>    1991 Demo I                            NA
-#>  5 13606 <chr [1]>    1992 Aske                              NA
-#>  6 13600 <chr [1]>    1992 Det som engang var                NA
-#>  7 13599 <chr [1]>    1992 Burzum                            NA
-#>  8 13597 <chr [1]>    1991 Demo II                           NA
-#>  9 12595 <chr [1]>      NA Enslaved                        1991
-#> 10 13598 <chr [1]>    1991 Nema                              NA
-#> 11 13604 <chr [1]>    1992 Yggdrasill                        NA
-#> 12 13610 <chr [1]>    1992 Hordanes Land                     NA
-#> 13 13615 <chr [1]>    1993 Vikingligr Veldi                  NA
-#> 14 12598 <chr [1]>      NA Immortal                        1991
-#> 15 13596 <chr [1]>    1991 Immortal                          NA
-#> 16 13601 <chr [1]>    1992 Diabolical Fullmoon Mysticism     NA
-#> 17 13621 <chr [1]>    1993 Pure Holocaust                    NA
+#>    id    label     name                          formed release
+#>    <chr> <list>    <chr>                          <int>   <int>
+#>  1 16020 <chr [1]> Burzum                          1991      NA
+#>  2 16058 <chr [1]> Filosofem                         NA    1993
+#>  3 16053 <chr [1]> Hvis lyset tar oss                NA    1992
+#>  4 16051 <chr [1]> Aske                              NA    1992
+#>  5 16045 <chr [1]> Det som engang var                NA    1992
+#>  6 16044 <chr [1]> Burzum                            NA    1992
+#>  7 16042 <chr [1]> Demo II                           NA    1991
+#>  8 16039 <chr [1]> Demo I                            NA    1991
+#>  9 16055 <chr [1]> Hordanes Land                     NA    1992
+#> 10 16024 <chr [1]> Enslaved                        1991      NA
+#> 11 16060 <chr [1]> Vikingligr Veldi                  NA    1993
+#> 12 16043 <chr [1]> Nema                              NA    1991
+#> 13 16049 <chr [1]> Yggdrasill                        NA    1992
+#> 14 16027 <chr [1]> Immortal                        1991      NA
+#> 15 16046 <chr [1]> Diabolical Fullmoon Mysticism     NA    1992
+#> 16 16066 <chr [1]> Pure Holocaust                    NA    1993
+#> 17 16041 <chr [1]> Immortal                          NA    1991
 ```
 
 ``` r
@@ -387,23 +371,23 @@ res$nodes %>%
 #> # A tibble: 17 x 3
 #>    id    properties value 
 #>    <chr> <list>     <chr> 
-#>  1 13608 <list [2]> record
-#>  2 12591 <list [2]> Band  
-#>  3 13613 <list [2]> record
-#>  4 13594 <list [2]> record
-#>  5 13606 <list [2]> record
-#>  6 13600 <list [2]> record
-#>  7 13599 <list [2]> record
-#>  8 13597 <list [2]> record
-#>  9 12595 <list [2]> Band  
-#> 10 13598 <list [2]> record
-#> 11 13604 <list [2]> record
-#> 12 13610 <list [2]> record
-#> 13 13615 <list [2]> record
-#> 14 12598 <list [2]> Band  
-#> 15 13596 <list [2]> record
-#> 16 13601 <list [2]> record
-#> 17 13621 <list [2]> record
+#>  1 16020 <list [2]> Band  
+#>  2 16058 <list [2]> record
+#>  3 16053 <list [2]> record
+#>  4 16051 <list [2]> record
+#>  5 16045 <list [2]> record
+#>  6 16044 <list [2]> record
+#>  7 16042 <list [2]> record
+#>  8 16039 <list [2]> record
+#>  9 16055 <list [2]> record
+#> 10 16024 <list [2]> Band  
+#> 11 16060 <list [2]> record
+#> 12 16043 <list [2]> record
+#> 13 16049 <list [2]> record
+#> 14 16027 <list [2]> Band  
+#> 15 16046 <list [2]> record
+#> 16 16066 <list [2]> record
+#> 17 16041 <list [2]> record
 ```
 
   - `unnest_relationships()`
@@ -416,20 +400,20 @@ unnest_relationships(res$relationships)
 #> # A tibble: 14 x 5
 #>    id    type         startNode endNode value
 #>    <chr> <chr>        <chr>     <chr>   <lgl>
-#>  1 21824 WAS_RECORDED 13608     12591   NA   
-#>  2 21825 WAS_RECORDED 13613     12591   NA   
-#>  3 21819 WAS_RECORDED 13594     12591   NA   
-#>  4 21823 WAS_RECORDED 13606     12591   NA   
-#>  5 21822 WAS_RECORDED 13600     12591   NA   
-#>  6 21821 WAS_RECORDED 13599     12591   NA   
-#>  7 21820 WAS_RECORDED 13597     12591   NA   
-#>  8 21832 WAS_RECORDED 13598     12595   NA   
-#>  9 21833 WAS_RECORDED 13604     12595   NA   
-#> 10 21834 WAS_RECORDED 13610     12595   NA   
-#> 11 21835 WAS_RECORDED 13615     12595   NA   
-#> 12 21829 WAS_RECORDED 13596     12598   NA   
-#> 13 21830 WAS_RECORDED 13601     12598   NA   
-#> 14 21831 WAS_RECORDED 13621     12598   NA
+#>  1 23757 WAS_RECORDED 16058     16020   NA   
+#>  2 23756 WAS_RECORDED 16053     16020   NA   
+#>  3 23755 WAS_RECORDED 16051     16020   NA   
+#>  4 23754 WAS_RECORDED 16045     16020   NA   
+#>  5 23753 WAS_RECORDED 16044     16020   NA   
+#>  6 23752 WAS_RECORDED 16042     16020   NA   
+#>  7 23751 WAS_RECORDED 16039     16020   NA   
+#>  8 23766 WAS_RECORDED 16055     16024   NA   
+#>  9 23767 WAS_RECORDED 16060     16024   NA   
+#> 10 23764 WAS_RECORDED 16043     16024   NA   
+#> 11 23765 WAS_RECORDED 16049     16024   NA   
+#> 12 23762 WAS_RECORDED 16046     16027   NA   
+#> 13 23763 WAS_RECORDED 16066     16027   NA   
+#> 14 23761 WAS_RECORDED 16041     16027   NA
 ```
 
   - `unnest_graph`
@@ -441,44 +425,44 @@ This function takes a graph results, and does `unnest_nodes` and
 unnest_graph(res)
 #> $nodes
 #> # A tibble: 17 x 5
-#>    id    value  release name                          formed
-#>    <chr> <chr>    <int> <chr>                          <int>
-#>  1 13608 record    1992 Hvis lyset tar oss                NA
-#>  2 12591 Band        NA Burzum                          1991
-#>  3 13613 record    1993 Filosofem                         NA
-#>  4 13594 record    1991 Demo I                            NA
-#>  5 13606 record    1992 Aske                              NA
-#>  6 13600 record    1992 Det som engang var                NA
-#>  7 13599 record    1992 Burzum                            NA
-#>  8 13597 record    1991 Demo II                           NA
-#>  9 12595 Band        NA Enslaved                        1991
-#> 10 13598 record    1991 Nema                              NA
-#> 11 13604 record    1992 Yggdrasill                        NA
-#> 12 13610 record    1992 Hordanes Land                     NA
-#> 13 13615 record    1993 Vikingligr Veldi                  NA
-#> 14 12598 Band        NA Immortal                        1991
-#> 15 13596 record    1991 Immortal                          NA
-#> 16 13601 record    1992 Diabolical Fullmoon Mysticism     NA
-#> 17 13621 record    1993 Pure Holocaust                    NA
+#>    id    value  name                          formed release
+#>    <chr> <chr>  <chr>                          <int>   <int>
+#>  1 16020 Band   Burzum                          1991      NA
+#>  2 16058 record Filosofem                         NA    1993
+#>  3 16053 record Hvis lyset tar oss                NA    1992
+#>  4 16051 record Aske                              NA    1992
+#>  5 16045 record Det som engang var                NA    1992
+#>  6 16044 record Burzum                            NA    1992
+#>  7 16042 record Demo II                           NA    1991
+#>  8 16039 record Demo I                            NA    1991
+#>  9 16055 record Hordanes Land                     NA    1992
+#> 10 16024 Band   Enslaved                        1991      NA
+#> 11 16060 record Vikingligr Veldi                  NA    1993
+#> 12 16043 record Nema                              NA    1991
+#> 13 16049 record Yggdrasill                        NA    1992
+#> 14 16027 Band   Immortal                        1991      NA
+#> 15 16046 record Diabolical Fullmoon Mysticism     NA    1992
+#> 16 16066 record Pure Holocaust                    NA    1993
+#> 17 16041 record Immortal                          NA    1991
 #> 
 #> $relationships
 #> # A tibble: 14 x 5
 #>    id    type         startNode endNode value
 #>    <chr> <chr>        <chr>     <chr>   <lgl>
-#>  1 21824 WAS_RECORDED 13608     12591   NA   
-#>  2 21825 WAS_RECORDED 13613     12591   NA   
-#>  3 21819 WAS_RECORDED 13594     12591   NA   
-#>  4 21823 WAS_RECORDED 13606     12591   NA   
-#>  5 21822 WAS_RECORDED 13600     12591   NA   
-#>  6 21821 WAS_RECORDED 13599     12591   NA   
-#>  7 21820 WAS_RECORDED 13597     12591   NA   
-#>  8 21832 WAS_RECORDED 13598     12595   NA   
-#>  9 21833 WAS_RECORDED 13604     12595   NA   
-#> 10 21834 WAS_RECORDED 13610     12595   NA   
-#> 11 21835 WAS_RECORDED 13615     12595   NA   
-#> 12 21829 WAS_RECORDED 13596     12598   NA   
-#> 13 21830 WAS_RECORDED 13601     12598   NA   
-#> 14 21831 WAS_RECORDED 13621     12598   NA   
+#>  1 23757 WAS_RECORDED 16058     16020   NA   
+#>  2 23756 WAS_RECORDED 16053     16020   NA   
+#>  3 23755 WAS_RECORDED 16051     16020   NA   
+#>  4 23754 WAS_RECORDED 16045     16020   NA   
+#>  5 23753 WAS_RECORDED 16044     16020   NA   
+#>  6 23752 WAS_RECORDED 16042     16020   NA   
+#>  7 23751 WAS_RECORDED 16039     16020   NA   
+#>  8 23766 WAS_RECORDED 16055     16024   NA   
+#>  9 23767 WAS_RECORDED 16060     16024   NA   
+#> 10 23764 WAS_RECORDED 16043     16024   NA   
+#> 11 23765 WAS_RECORDED 16049     16024   NA   
+#> 12 23762 WAS_RECORDED 16046     16027   NA   
+#> 13 23763 WAS_RECORDED 16066     16027   NA   
+#> 14 23761 WAS_RECORDED 16041     16027   NA   
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -495,12 +479,12 @@ There are two convenient functions to extract nodes and relationships:
 #> # A tibble: 6 x 3
 #>   id    label     properties
 #>   <chr> <list>    <list>    
-#> 1 13608 <chr [1]> <list [2]>
-#> 2 12591 <chr [1]> <list [2]>
-#> 3 13613 <chr [1]> <list [2]>
-#> 4 13594 <chr [1]> <list [2]>
-#> 5 13606 <chr [1]> <list [2]>
-#> 6 13600 <chr [1]> <list [2]>
+#> 1 16020 <chr [1]> <list [2]>
+#> 2 16058 <chr [1]> <list [2]>
+#> 3 16053 <chr [1]> <list [2]>
+#> 4 16051 <chr [1]> <list [2]>
+#> 5 16045 <chr [1]> <list [2]>
+#> 6 16044 <chr [1]> <list [2]>
 ```
 
 ``` r
@@ -510,11 +494,11 @@ There are two convenient functions to extract nodes and relationships:
 #> # A tibble: 5 x 5
 #>   id    type         startNode endNode properties
 #>   <chr> <chr>        <chr>     <chr>   <list>    
-#> 1 21824 WAS_RECORDED 13608     12591   <list [0]>
-#> 2 21825 WAS_RECORDED 13613     12591   <list [0]>
-#> 3 21819 WAS_RECORDED 13594     12591   <list [0]>
-#> 4 21823 WAS_RECORDED 13606     12591   <list [0]>
-#> 5 21822 WAS_RECORDED 13600     12591   <list [0]>
+#> 1 23757 WAS_RECORDED 16058     16020   <list [0]>
+#> 2 23756 WAS_RECORDED 16053     16020   <list [0]>
+#> 3 23755 WAS_RECORDED 16051     16020   <list [0]>
+#> 4 23754 WAS_RECORDED 16045     16020   <list [0]>
+#> 5 23753 WAS_RECORDED 16044     16020   <list [0]>
 ```
 
 ## Convert for common graph packages
@@ -523,64 +507,142 @@ There are two convenient functions to extract nodes and relationships:
 
 In order to be converted into a graph object:
 
-  - nodes need an id, and a name. By default, node name is assumed to be
-    found in the “name” property returned by the graph, specifying any
-    other column is allowed. The “label” column from Neo4J is renamed
-    “group”.
+  - The nodes should be a dataframe with the first column being a series
+    of unique ID, understood as “names” by igraph - these are the ID
+    columns from Neo4J. Other columns are considered attributes.
 
   - relationships need a start and an end, *i.e.* startNode and endNode
     in the Neo4J results.
 
-<!-- end list -->
+Here how to create a graph object from a `{neo4r}`
+result:
 
 ``` r
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>%
-  convert_to("igraph")
-#> IGRAPH f607d94 DN-- 6 5 -- 
-#> + attr: name (v/c), value (v/c), release (v/n), formed (v/n), type
-#> | (e/c), id (e/c), value (e/l)
-#> + edges from f607d94 (vertex names):
-#> [1] Hvis lyset tar oss->Burzum Filosofem         ->Burzum
-#> [3] Demo I            ->Burzum Aske              ->Burzum
-#> [5] Det som engang var->Burzum
+G <- "MATCH a=(p:Person {name: 'Tom Hanks'})-[r:ACTED_IN]->(m:Movie) RETURN a;" %>% 
+  call_neo4j(con, type = "graph") 
+
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+library(purrr)
+#> 
+#> Attaching package: 'purrr'
+#> The following object is masked from 'package:magrittr':
+#> 
+#>     set_names
+# Create a dataframe with col 1 being the ID, 
+# And columns 2 being the names
+G$nodes <- G$nodes %>%
+  unnest_nodes(what = "properties") %>% 
+  # We're extracting the first label of each node, but 
+  # this column can also be removed if not needed
+  mutate(label = map_chr(label, 1))
+head(G$nodes)
+#> # A tibble: 6 x 7
+#>   id    label   born name    tagline                    title      released
+#>   <chr> <chr>  <int> <chr>   <chr>                      <chr>         <int>
+#> 1 16149 Person  1956 Tom Ha… <NA>                       <NA>             NA
+#> 2 16189 Movie     NA <NA>    Break The Codes            The Da Vi…     2006
+#> 3 16208 Movie     NA <NA>    Walk a mile you'll never … The Green…     1999
+#> 4 16228 Movie     NA <NA>    At the edge of the world,… Cast Away      2000
+#> 5 16222 Movie     NA <NA>    Houston, we have a proble… Apollo 13      1995
+#> 6 16240 Movie     NA <NA>    Once in a lifetime you ge… A League …     1992
 ```
 
-Which means that you can :
+We then reorder the relationnship table:
 
 ``` r
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>% 
-  convert_to("igraph") %>%
-  plot()
+G$relationships <- G$relationships %>%
+  unnest_relationships() %>%
+  select(startNode, endNode, type, everything())
+head(G$relationships)
+#> # A tibble: 6 x 5
+#>   startNode endNode type     id    roles             
+#>   <chr>     <chr>   <chr>    <chr> <chr>             
+#> 1 16149     16189   ACTED_IN 23940 Dr. Robert Langdon
+#> 2 16149     16208   ACTED_IN 23996 Paul Edgecomb     
+#> 3 16149     16228   ACTED_IN 24027 Chuck Noland      
+#> 4 16149     16222   ACTED_IN 24016 Jim Lovell        
+#> 5 16149     16240   ACTED_IN 24048 Jimmy Dugan       
+#> 6 16149     16239   ACTED_IN 24046 Hero Boy
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+``` r
+graph_object <- igraph::graph_from_data_frame(
+  d = G$relationships, 
+  directed = TRUE, 
+  vertices = G$nodes
+)
+plot(graph_object)
+```
+
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
 This can also be used with `{ggraph}` :
 
 ``` r
 library(ggraph)
 #> Loading required package: ggplot2
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>% 
-  convert_to("igraph") %>%
+graph_object %>%
   ggraph() + 
-  geom_node_label(aes(label = name)) +
+  geom_node_label(aes(label = label)) +
   geom_edge_link() + 
   theme_graph()
 #> Using `nicely` as default layout
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
 ### {visNetwork}
 
+`{visNetwork}` expects the following format :
+
+#### nodes
+
+  - “id” : id of the node, needed in edges information
+  - “label” : label of the node
+  - “group” : group of the node. Groups can be configure with visGroups
+  - “value” : size of the node
+  - “title” : tooltip of the node
+
+#### edges
+
+  - “from” : node id of begin of the edge
+  - “to” : node id of end of the edge
+  - “label” : label of the edge
+  - “value” : size of the node
+  - “title” : tooltip of the node
+
+(from `?visNetwork::visNetwork`).
+
+`visNetwork` is smart enough to transform a list column into several
+label, so we don’t have to worry too much about this one.
+
+Here’s how to convert our `{neo4r}`
+result:
+
 ``` r
-network <- 'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
-  call_neo4j(con, type = "graph") %>% 
-  convert_to("visNetwork")
-visNetwork::visNetwork(network$nodes, network$relationships)
+G <-"MATCH a=(p:Person {name: 'Tom Hanks'})-[r:ACTED_IN]->(m:Movie) RETURN a;" %>% 
+  call_neo4j(con, type = "graph") 
+
+# We'll just unnest the properties
+G$nodes <- G$nodes %>%
+  unnest_nodes(what = "properties")
+head(G$nodes)  
+
+# Turn the relationships :
+G$relationships <- G$relationships %>%
+  unnest_relationships() %>%
+  select(from = startNode, to = endNode, label = type)
+head(G$relationships)
+
+visNetwork::visNetwork(G$nodes, G$relationships)
 ```
 
 ## Sending data to the API

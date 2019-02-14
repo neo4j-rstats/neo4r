@@ -3,9 +3,10 @@
 #' @param nodes_tbl the node table
 #' @param what what to unnest
 #'
-#' @importFrom purrr map_df
+#' @importFrom purrr map_df map_int
 #' @importFrom tidyr unnest
 #' @importFrom tibble as_tibble
+#' @importFrom attempt warn_if_any
 #'
 #' @return a new dataframe
 #' @export
@@ -24,12 +25,14 @@ unnest_nodes <- function(nodes_tbl, what = c("all", "label", "properties")) {
 
     nodes_tbl$properties <- map(nodes_tbl$properties, na_or_self)
     nodes_tbl$properties <- map(nodes_tbl$properties, as_tibble)
+
     nodes_tbl <- nodes_tbl %>% unnest(properties, .drop = FALSE)
 
   } else {
 
     nodes_tbl$label <- map(nodes_tbl$label, na_or_self)
     nodes_tbl$label <- map(nodes_tbl$label, as_tibble)
+    #nodes_tbl$label <- map(nodes_tbl$label, ~ .x[1, ])
     nodes_tbl <- nodes_tbl %>% unnest(label, .drop = FALSE)
 
     nodes_tbl$properties <- map(nodes_tbl$properties, na_or_self)

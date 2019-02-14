@@ -16,9 +16,9 @@ send_cypher(path, con, type = c("row", "graph"), output = c("r",
 
 \item{output}{the printing method (r or json)}
 
-\item{include_stats}{wether of not to include stats}
+\item{include_stats}{whether of not to include stats}
 
-\item{meta}{wether of not to include meta info}
+\item{meta}{whether of not to include meta info}
 }
 \value{
 a cypher call

@@ -15,3 +15,7 @@ an unnested table
 \description{
 Unnest a Relationships table
 }
+\note{
+Please note that the properties will be converted to character if the class
+   is not unique.
+}

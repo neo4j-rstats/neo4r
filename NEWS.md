@@ -1,5 +1,9 @@
 # neo4r
 
+# Version 0.1.1
+
+convert_to is deprecated for now, needs more work to be done. 
+ 
 # Version 0.1.0
 
 First version for CRAN.
