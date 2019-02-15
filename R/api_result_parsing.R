@@ -1,6 +1,6 @@
 #' @importFrom httr content
 #' @importFrom attempt stop_if
-#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr compact flatten_dfr
+#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr  compact flatten_dfr vec_depth
 #' @importFrom tidyr gather
 #' @importFrom stats setNames
 #' @importFrom tibble tibble
@@ -20,6 +20,18 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
   }
   # Get the result element
   results <- api_content$results[[1]]
+
+  # turn the null to NA
+  modify_depth(
+    results, vec_depth(results) - 1, function(x){
+      if (is.null(x)){
+        NA
+      } else {
+        x
+      }
+    }, .ragged = TRUE
+  )
+
   # Get the stats (if any)
   if (!is.null(results$stats)) {
     stats <- tibble(
