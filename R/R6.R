@@ -123,7 +123,7 @@ neo4j_api <- R6::R6Class(
     },
     # Get the schema of the db
     # There must be a better way to parse this
-    get_schema = function() {
+    get_index = function() {
       res <- get_wrapper(self, "db/data/schema/index")
       map(content(res), as_tibble) %>% map(unnest) %>% rbindlist()
     },
