@@ -22,7 +22,7 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
   results <- api_content$results[[1]]
 
   # turn the null to NA
-  modify_depth(
+  results <- modify_depth(
     results, vec_depth(results) - 1, function(x){
       if (is.null(x)){
         NA
