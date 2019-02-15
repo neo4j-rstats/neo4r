@@ -93,8 +93,8 @@ con$get_constraints()
 con$get_labels()
 # Get a vector of relationships (if any)
 con$get_relationships()
-# Get schema 
-con$get_schema()
+# Get index 
+con$get_index()
 ```
 
 ### Using the Connection Pane
