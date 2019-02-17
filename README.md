@@ -88,28 +88,29 @@ con$get_version()
 # List constaints (if any)
 con$get_constraints()
 #>         label       type property_keys
-#> 1:     artist UNIQUENESS          name
-#> 2: Maintainer UNIQUENESS          name
-#> 3:       Band UNIQUENESS          name
+#> 1:       Band UNIQUENESS          name
+#> 2:     record UNIQUENESS          name
+#> 3:     Author UNIQUENESS          name
 #> 4:       City UNIQUENESS          name
-#> 5:     record UNIQUENESS          name
+#> 5:     artist UNIQUENESS          name
 #> 6:    Package UNIQUENESS          name
-#> 7:     Author UNIQUENESS          name
+#> 7: Maintainer UNIQUENESS          name
 # Get a vector of labels (if any)
 con$get_labels()
-#> # A tibble: 10 x 1
+#> # A tibble: 11 x 1
 #>    labels    
 #>    <chr>     
-#>  1 City      
-#>  2 Band      
-#>  3 record    
-#>  4 Author    
-#>  5 Person    
-#>  6 Maintainer
+#>  1 artist    
+#>  2 Package   
+#>  3 Person    
+#>  4 record    
+#>  5 Band      
+#>  6 City      
 #>  7 album     
-#>  8 Package   
-#>  9 Movie     
-#> 10 artist
+#>  8 Maintainer
+#>  9 Author    
+#> 10 Movie     
+#> 11 Character
 # Get a vector of relationships (if any)
 con$get_relationships()
 #> # A tibble: 10 x 1
@@ -125,8 +126,8 @@ con$get_relationships()
 #>  8 WROTE       
 #>  9 FOLLOWS     
 #> 10 REVIEWED
-# Get schema 
-con$get_schema()
+# Get index 
+con$get_index()
 #>         label property_keys
 #> 1:       Band          name
 #> 2:     Author          name
@@ -733,13 +734,13 @@ call_neo4j("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
 # List constaints (if any)
 con$get_constraints()
 #>         label       type property_keys
-#> 1:     artist UNIQUENESS          name
-#> 2: Maintainer UNIQUENESS          name
-#> 3:       Band UNIQUENESS          name
+#> 1:       Band UNIQUENESS          name
+#> 2:     record UNIQUENESS          name
+#> 3:     Author UNIQUENESS          name
 #> 4:       City UNIQUENESS          name
-#> 5:     record UNIQUENESS          name
+#> 5:     artist UNIQUENESS          name
 #> 6:    Package UNIQUENESS          name
-#> 7:     Author UNIQUENESS          name
+#> 7: Maintainer UNIQUENESS          name
 # Create the query that will create the nodes and relationships
 on_load_query <- 'MERGE (a:artist { name: csvLine.artist})
 MERGE (al:album {name: csvLine.album_name})
