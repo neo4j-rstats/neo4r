@@ -21,16 +21,18 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
   # Get the result element
   results <- api_content$results[[1]]
 
-  # turn the null to NA
-  results <- modify_depth(
-    results, vec_depth(results) - 1, function(x){
-      if (is.null(x)){
-        NA
-      } else {
-        x
-      }
-    }, .ragged = TRUE
-  )
+  for (i in 1:vec_depth(results) - 1){
+    results <- modify_depth(
+      results, i, function(x){
+        if (is.null(x)){
+          NA
+        } else {
+          x
+        }
+      }, .ragged = TRUE
+    )
+  }
+
 
   # Get the stats (if any)
   if (!is.null(results$stats)) {
@@ -155,7 +157,7 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
 
 
 rbindlist_to_tibble <- function(l){
-  tibble::as_tibble(data.table::rbindlist(l))
+  tibble::as_tibble(data.table::rbindlist(l, fill = TRUE))
 }
 
 #'
