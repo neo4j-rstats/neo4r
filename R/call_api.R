@@ -11,10 +11,10 @@ to_json_neo <- function(query, params, include_stats, meta, type) {
   toJSON(
     list(
       statement = query,
-      parameters = params,
       includeStats = include_stats,
       meta = meta,
-      resultDataContents = list(type)
+      resultDataContents = list(type),
+      parameters = params
     ),
     auto_unbox = TRUE
   )
