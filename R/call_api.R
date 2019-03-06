@@ -7,14 +7,14 @@ clean_query <- function(query) {
 
 #' @importFrom jsonlite toJSON
 
-to_json_neo <- function(query, params, include_stats, meta, type) {
+to_json_neo <- function(query, include_stats, meta, type, params) {
   toJSON(
     list(
       statement = query,
-      parameters = params,
       includeStats = include_stats,
       meta = meta,
-      resultDataContents = list(type)
+      resultDataContents = list(type),
+      parameters = params
     ),
     auto_unbox = TRUE
   )
@@ -23,12 +23,12 @@ to_json_neo <- function(query, params, include_stats, meta, type) {
 #' Call Neo4J API
 #'
 #' @param query The cypher query
-#' @param params Parameters to pass along the query
 #' @param con A NEO4JAPI connection object
 #' @param type Return the result as row or as graph
 #' @param output Use "json" if you want the output to be printed as JSON
 #' @param include_stats tShould the stats about the transaction be included?
 #' @param include_meta tShould the stats about the transaction be included?
+#' @param params Parameters to pass along the query
 #'
 #' @importFrom glue glue
 #' @importFrom attempt stop_if_not
@@ -38,11 +38,11 @@ to_json_neo <- function(query, params, include_stats, meta, type) {
 #' @export
 
 call_neo4j <- function(query, con,
-                       params = NULL,
                        type = c("row", "graph"),
                        output = c("r", "json"),
                        include_stats = FALSE,
-                       include_meta = FALSE) {
+                       include_meta = FALSE,
+                       params = NULL) {
   # browser()
   stop_if_not(
     con, ~"Neo4JAPI" %in% class(.x),
@@ -57,7 +57,7 @@ call_neo4j <- function(query, con,
   query_clean <- clean_query(query)
 
   # Transform the query to a Neo4J JSON format
-  query_jsonised <- to_json_neo(query_clean, params, include_stats, include_meta, type)
+  query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type, params)
   # Unfortunately I was not able to programmatically convert everything to JSON
   body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
 
