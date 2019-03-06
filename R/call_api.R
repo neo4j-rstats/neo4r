@@ -39,7 +39,8 @@ to_json_neo <- function(query, include_stats, meta, type, params) {
 
 call_neo4j <- function(query, con,
                        type = c("row", "graph"),
-                       output = c("r", "json"),
+                       output = c("r", "json", "raw"),
+                       format = c("std", "table"),
                        include_stats = FALSE,
                        include_meta = FALSE,
                        params = NULL) {
@@ -50,7 +51,7 @@ call_neo4j <- function(query, con,
   )
   # Ensure the inputs are the one we expect
   output <- match.arg(output)
-  # format <- match.arg(format)
+  format <- match.arg(format)
   type <- match.arg(type)
 
   # Clean the query to prevent weird mess up with " and stuffs
@@ -80,6 +81,8 @@ call_neo4j <- function(query, con,
   # Return the parsed output, to json or to R
   if (output == "json") {
     toJSON(lapply(content(res)$results, function(x) x$data), pretty = TRUE)
+  } else if (output == "raw") {
+   content(res)
   } else {
     parse_api_results(
       res = res,

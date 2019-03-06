@@ -65,7 +65,7 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
     x
   })
 
-  if (type == "row") {
+  if (type == "row" & format == "std") {
     # Type = row
     # Special case for handling arrays
     # browser()
@@ -95,6 +95,22 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
       res <- c(res, res_meta)
     }
     class(res) <- c("neo", class(res))
+    return(res)
+
+  } else if (type == "row" & format == "table") {
+
+    res <- res_data %>% purrr::map("row")
+    res <- res %>% map(magrittr::set_names, res_names) %>% map(as_tibble) %>% bind_rows()
+    res <- list(results = res)
+
+    if (include_stats) {
+      res <- c(res, list(stats = stats))
+    }
+
+    if (meta) {
+      res <- c(res, res_meta)
+    }
+
     return(res)
 
   } else if (type == "graph") {
