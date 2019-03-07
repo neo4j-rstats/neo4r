@@ -5,6 +5,17 @@
 #' @importFrom stats setNames
 #' @importFrom tibble tibble
 
+replaceInList <- function (x, FUN, ...)
+{
+  if (is.list(x)) {
+    for (i in seq_along(x)) {
+      x[i] <- list(replaceInList(x[[i]], FUN, ...))
+    }
+    x
+  }
+  else FUN(x, ...)
+}
+
 parse_api_results <- function(res, type, include_stats, meta, format) {
 
   # Get the content as an R list
@@ -22,15 +33,19 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
   results <- api_content$results[[1]]
 
   # turn the null to NA
-  results <- modify_depth(
-    results, vec_depth(results) - 1, function(x){
-      if (is.null(x)){
-        NA
-      } else {
-        x
-      }
-    }, .ragged = TRUE
-  )
+  # results <- modify_depth(
+  #   results, vec_depth(results) - 1, function(x){
+  #     if (is.null(x)){
+  #       NA
+  #     } else {
+  #       x
+  #     }
+  #   }, .ragged = TRUE
+  # )
+
+
+  results <- replaceInList(results, function(x) if(is.null(x)) NA else x)
+
 
   # Get the stats (if any)
   if (!is.null(results$stats)) {
