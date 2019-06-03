@@ -15,15 +15,16 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 
-# library(neo4r)
-# con <- neo4j_api$new(
-#   url = "http://localhost:7474",
-#   user = "neo4j", 
-#   password = "pouetpouet"
-#   )
-#call_neo4j("MATCH (n) DETACH DELETE n", con)
-#send_cypher("data-raw/create.cypher", con)
-
+system("docker run --name neo4j --env NEO4J_AUTH=neo4j/password --publish=7474:7474 --publish=7687:7687 -d neo4j")
+library(neo4r)
+con <- neo4j_api$new(
+  url = "http://localhost:7474", 
+  user = "neo4j", 
+  password = "password"
+)
+while (try(con$ping()) != 200){
+  Sys.sleep(3)
+}
 ```
 
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
@@ -55,19 +56,28 @@ You can install {neo4r} from GitHub with:
 remotes::install_github("neo4j-rstats/neo4r")
 ```
 
+or from CRAN : 
+
+```{r, eval = FALSE}
+install.packages("neo4r")
+```
+
 ## Create a connexion object 
 
 Start by creating a new connexion object with `neo4j_api$new`
 
 ```{r}
 library(neo4r)
-con <- neo4j_api$new(url = "http://localhost:7474", 
-                     user = "plop", password = "pouetpouet")
+con <- neo4j_api$new(
+  url = "http://localhost:7474", 
+  user = "neo4j", 
+  password = "plop"
+)
 ```
 
 This connexion object is designed to interact with the Neo4J API. 
 
-It comes with some methods to retrieve information from it : 
+It comes with some methods to retrieve information from it. `ping()`, for example, tests if the endpoint is available.
 
 ```{r}
 # Test the endpoint, that will not work :
@@ -78,11 +88,11 @@ Being an R6 object, `con` is flexible in the sense that you can change `url`, `u
 
 ```{r}
 con$reset_user("neo4j")
-con$reset_password("neo4j") 
+con$reset_password("password") 
 con$ping()
 ```
 
-That means you can connect to another url at any time without having to create a new connexion object. (`con$reset_url()`).
+Other methods:
 
 ```{r}
 # Get Neo4J Version
@@ -97,13 +107,6 @@ con$get_relationships()
 con$get_index()
 ```
 
-### Using the Connection Pane
-
-`{neo4r}` comes with a Connection Pane interface for RStudio. 
-
-Once installed, you can go to the "Connections", and use the widget to connect to the Neo4J server: 
-
-![](readmefigs/connectionpane.png)
 
 ## Call the API
 
@@ -115,8 +118,17 @@ The `call_neo4j()` function takes several arguments :
 + `con` : the connexion object 
 + `type` : "rows" or "graph": whether to return the results as a list of results in tibble, or as a graph object (with `$nodes` and `$relationships`)
 + `output` : the output format (R or json) 
-+ `include_stats` : whether or not to include the stats about the call 
++ `include_stats` : whether or not to include the stats about the call
 + `meta` : whether or not to include the meta arguments of the nodes when calling with "rows"
+
+### The movie graph 
+
+Starting at version 0.1.3, the `play_movie()` function returns the full cypher query to create the movie graph example from the Neo4J examples.
+
+```{r}
+play_movies() %>%
+  call_neo4j(con)
+```
 
 ### "rows" format
 
@@ -125,25 +137,40 @@ The user chooses whether or not to return a list of tibbles when calling the API
 ```{r}
 library(magrittr)
 
-'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
+'MATCH (tom {name: "Tom Hanks"}) RETURN tom;' %>%
+  call_neo4j(con)
+
+'MATCH (cloudAtlas {title: "Cloud Atlas"}) RETURN cloudAtlas;' %>%
+  call_neo4j(con)
+
+"MATCH (people:Person)-[relatedTo]-(:Movie {title: 'Cloud Atlas'}) RETURN people.name, Type(relatedTo), relatedTo" %>%
+  call_neo4j(con, type = 'row')
+```
+
+By default, results are returned as an R list of tibbles. For example here, `RETURN tom` will return a one element list, with object named `tom`. We think this is the more "truthful" way to implement the outputs regarding Neo4J calls. 
+
+When you want to return two nodes types, you'll get two results, in the form of two tibbles - the result is a two elements list with each element being labelled the way it has been specified in the Cypher query. 
+
+```{r}
+'MATCH (tom:Person {name: "Tom Hanks"})-[:ACTED_IN]->(tomHanksMovies) RETURN tom,tomHanksMovies' %>%
   call_neo4j(con)
 ```
 
-By default, results are returned as an R list of tibbles. We think this is the more "truthful" way to implement the outputs regarding Neo4J calls. 
 
-For example, when you want to return two nodes types, you'll get two results, in the form of two tibbles (what we've seen just before) - the result is a two elements list with each element being labelled the way it has been specified in the Cypher query. 
-
-Results can also be returned in JSON:
+Results can also be returned in JSON, for example for writing to a file:
 
 ```{r}
-'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN * LIMIT 1;' %>%
-  call_neo4j(con, output = "json")
+tmp <- tempfile(fileext = ".json")
+'MATCH (people:Person) RETURN people.name LIMIT 1' %>%
+  call_neo4j(con, output = "json") %>%
+  write(tmp)
+jsonlite::read_json(tmp)
 ```
 
 If you turn the `type` argument to `"graph"`, you'll get a graph result: 
 
 ```{r}
-'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
+'MATCH (tom:Person {name: "Tom Hanks"})-[act:ACTED_IN]->(tomHanksMovies) RETURN act,tom,tomHanksMovies' %>%
   call_neo4j(con, type = "graph")
 ```
 
@@ -156,24 +183,24 @@ We have designed several functions to unnest the output :
 +`unnest_nodes()`, that can unnest a node dataframe : 
 
 ```{r}
-res <- 'MATCH (r:record) -[w:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
+res <- 'MATCH (tom:Person {name:"Tom Hanks"})-[a:ACTED_IN]->(m)<-[:ACTED_IN]-(coActors) RETURN m AS acted,coActors.name' %>%
   call_neo4j(con, type = "graph")
 unnest_nodes(res$nodes)
 ```
 
-Please, note that this function will return `NA` for the properties that aren't in a node. For example here, we have no 'licence' information for the Maintainer node (that makes sense). 
-
-On the long run, and this is not {neo4r} specific but Neo4J related, a good practice is to have a "name" propertie on each node, so this column will be full here.
+Please, note that this function will return `NA` for the properties that aren't in a node. 
 
 Also, it is possible to unnest either the properties or the labels : 
 
 ```{r}
-res$nodes %>%
+res %>%
+  extract_nodes() %>%
   unnest_nodes(what = "properties")
 ```
 
 ```{r}
-res$nodes %>%
+res %>%
+  extract_nodes() %>%
   unnest_nodes(what = "label")
 ```
 
@@ -182,15 +209,22 @@ res$nodes %>%
 There is only one nested column in the relationship table, thus the function is quite straightforward : 
 
 ```{r}
-unnest_relationships(res$relationships)
+'MATCH (people:Person)-[relatedTo]-(:Movie {title: "Cloud Atlas"}) RETURN people.name, Type(relatedTo), relatedTo' %>%
+  call_neo4j(con, type = "graph") %>%
+  extract_relationships() %>%
+  unnest_relationships()
 ```
+
+Note that `unnest_relationships()` only does one level of unnesting.
 
 + `unnest_graph`
 
 This function takes a graph results, and does `unnest_nodes` and `unnest_relationships`. 
 
 ```{r}
-unnest_graph(res)
+'MATCH (people:Person)-[relatedTo]-(:Movie {title: "Cloud Atlas"}) RETURN people.name, Type(relatedTo), relatedTo' %>%
+  call_neo4j(con, type = "graph") %>%
+  unnest_graph()
 ```
 
 ### Extraction 
@@ -198,13 +232,16 @@ unnest_graph(res)
 There are two convenient functions to extract nodes and relationships: 
 
 ```{r}
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+'MATCH (bacon:Person {name:"Kevin Bacon"})-[*1..4]-(hollywood) RETURN DISTINCT hollywood' %>%
   call_neo4j(con, type = "graph") %>% 
   extract_nodes()
 ```
 
 ```{r}
-'MATCH p=()-[w:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+'MATCH p=shortestPath(
+  (bacon:Person {name:"Kevin Bacon"})-[*]-(meg:Person {name:"Meg Ryan"})
+)
+RETURN p' %>%
   call_neo4j(con, type = "graph") %>% 
   extract_relationships()
 ```
@@ -242,7 +279,8 @@ We then reorder the relationnship table:
 ```{r}
 G$relationships <- G$relationships %>%
   unnest_relationships() %>%
-  select(startNode, endNode, type, everything())
+  select(startNode, endNode, type, everything()) %>%
+  mutate(roles = unlist(roles))
 head(G$relationships)
 ```
 
@@ -344,7 +382,7 @@ read_cypher("data-raw/create.cypher")
 
 + `send_cypher` reads a cypher file, and send it the the API. By default, the stats are returned. 
 
-```{r eval = FALSE}
+```{r}
 send_cypher("data-raw/constraints.cypher", con)
 ```
 
@@ -364,25 +402,28 @@ The args are :
 + `include_stats` : whether or not to include the stats 
 + `meta` : whether or not to return the meta information
 
-```{r eval = FALSE}
-# Create the constraints
-call_neo4j("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
-call_neo4j("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
-```
+Let's use Neo4J `northwind-graph` example for that.
 
 ```{r}
-# List constaints (if any)
-con$get_constraints()
 # Create the query that will create the nodes and relationships
-on_load_query <- 'MERGE (a:artist { name: csvLine.artist})
-MERGE (al:album {name: csvLine.album_name})
-MERGE (a) -[:has_recorded] -> (al)  
-RETURN a AS artists, al AS albums;'
+on_load_query <- 'CREATE (n:Product)
+  SET n = row,
+  n.unitPrice = toFloat(row.unitPrice),
+  n.unitsInStock = toInteger(row.unitsInStock), n.unitsOnOrder = toInteger(row.unitsOnOrder),
+  n.reorderLevel = toInteger(row.reorderLevel), n.discontinued = (row.discontinued <> "0");'
 # Send the csv 
-load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tracks.csv", 
+load_csv(url = "http://data.neo4j.com/northwind/products.csv", 
          con = con, header = TRUE, periodic_commit = 50, 
-         as = "csvLine", on_load = on_load_query)
+         as = "row", on_load = on_load_query)
 ```
+
+### Using the Connection Pane
+
+`{neo4r}` comes with a Connection Pane interface for RStudio. 
+
+Once installed, you can go to the "Connections", and use the widget to connect to the Neo4J server: 
+
+![](readmefigs/connectionpane.png)
 
 ## Sandboxing in Docker 
 
@@ -400,6 +441,6 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 By participating in this project you agree to abide by its terms.
 
 ```{r include = FALSE}
-# system(glue::glue("docker stop {con_name}"))
+system("docker stop neo4j && sleep 2 && docker rm neo4j")
 ```
 
