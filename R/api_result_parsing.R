@@ -186,7 +186,7 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
 
 
 rbindlist_to_tibble <- function(l){
-  tibble::as_tibble(data.table::rbindlist(l))
+  tibble::as_tibble(data.table::rbindlist(use.names = TRUE))
 }
 
 #'
