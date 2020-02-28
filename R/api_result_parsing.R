@@ -29,7 +29,7 @@ parse_row <- function(
   res_meta,
   format
 ){
-  if (type == "row" & format == "std") {
+  if (format == "std") {
     # Type = row
     # Special case for handling arrays
     # browser()
@@ -61,7 +61,7 @@ parse_row <- function(
     class(res) <- c("neo", class(res))
     return(res)
 
-  } else if (type == "row" & format == "table") {
+  } else if (format == "table") {
 
     res <- res_data %>% purrr::map("row")
     res <- res %>% map(magrittr::set_names, res_names) %>% map(as_tibble) %>% bind_rows()
