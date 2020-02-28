@@ -48,19 +48,29 @@ You can install {neo4r} from GitHub with:
 remotes::install_github("neo4j-rstats/neo4r")
 ```
 
+or from CRAN :
+
+``` r
+install.packages("neo4r")
+```
+
 ## Create a connexion object
 
 Start by creating a new connexion object with `neo4j_api$new`
 
 ``` r
 library(neo4r)
-con <- neo4j_api$new(url = "http://localhost:7474", 
-                     user = "plop", password = "pouetpouet")
+con <- neo4j_api$new(
+  url = "http://localhost:7474", 
+  user = "neo4j", 
+  password = "plop"
+)
 ```
 
 This connexion object is designed to interact with the Neo4J API.
 
-It comes with some methods to retrieve information from it :
+It comes with some methods to retrieve information from it. `ping()`,
+for example, tests if the endpoint is available.
 
 ``` r
 # Test the endpoint, that will not work :
@@ -73,79 +83,32 @@ Being an R6 object, `con` is flexible in the sense that you can change
 
 ``` r
 con$reset_user("neo4j")
-con$reset_password("neo4j") 
+con$reset_password("password") 
 con$ping()
 #> [1] 200
 ```
 
-That means you can connect to another url at any time without having to
-create a new connexion object. (`con$reset_url()`).
+Other methods:
 
 ``` r
 # Get Neo4J Version
 con$get_version()
-#> [1] "3.4.5"
+#> [1] "3.5.5"
 # List constaints (if any)
 con$get_constraints()
-#>         label       type property_keys
-#> 1:       Band UNIQUENESS          name
-#> 2:     record UNIQUENESS          name
-#> 3:     Author UNIQUENESS          name
-#> 4:       City UNIQUENESS          name
-#> 5:     artist UNIQUENESS          name
-#> 6:    Package UNIQUENESS          name
-#> 7: Maintainer UNIQUENESS          name
+#> Null data.table (0 rows and 0 cols)
 # Get a vector of labels (if any)
 con$get_labels()
-#> # A tibble: 11 x 1
-#>    labels    
-#>    <chr>     
-#>  1 artist    
-#>  2 Package   
-#>  3 Person    
-#>  4 record    
-#>  5 Band      
-#>  6 City      
-#>  7 album     
-#>  8 Maintainer
-#>  9 Author    
-#> 10 Movie     
-#> 11 Character
+#> # A tibble: 0 x 1
+#> # … with 1 variable: labels <chr>
 # Get a vector of relationships (if any)
 con$get_relationships()
-#> # A tibble: 10 x 1
-#>    labels      
-#>    <chr>       
-#>  1 PLAYED_IN   
-#>  2 IS_FROM     
-#>  3 WAS_RECORDED
-#>  4 has_recorded
-#>  5 ACTED_IN    
-#>  6 DIRECTED    
-#>  7 PRODUCED    
-#>  8 WROTE       
-#>  9 FOLLOWS     
-#> 10 REVIEWED
+#> # A tibble: 0 x 1
+#> # … with 1 variable: labels <chr>
 # Get index 
 con$get_index()
-#>         label property_keys
-#> 1:       Band          name
-#> 2:     Author          name
-#> 3:     artist          name
-#> 4:       City          name
-#> 5: Maintainer          name
-#> 6:    Package          name
-#> 7:     record          name
+#> Null data.table (0 rows and 0 cols)
 ```
-
-### Using the Connection Pane
-
-`{neo4r}` comes with a Connection Pane interface for RStudio.
-
-Once installed, you can go to the “Connections”, and use the widget to
-connect to the Neo4J server:
-
-![](readmefigs/connectionpane.png)
 
 ## Call the API
 
@@ -164,6 +127,63 @@ The `call_neo4j()` function takes several arguments :
   - `meta` : whether or not to include the meta arguments of the nodes
     when calling with “rows”
 
+### The movie graph
+
+Starting at version 0.1.3, the `play_movie()` function returns the full
+cypher query to create the movie graph example from the Neo4J examples.
+
+``` r
+play_movies() %>%
+  call_neo4j(con)
+#> $a
+#> # A tibble: 10 x 2
+#>     born name     
+#>    <int> <chr>    
+#>  1  1956 Tom Hanks
+#>  2  1956 Tom Hanks
+#>  3  1956 Tom Hanks
+#>  4  1956 Tom Hanks
+#>  5  1956 Tom Hanks
+#>  6  1956 Tom Hanks
+#>  7  1956 Tom Hanks
+#>  8  1956 Tom Hanks
+#>  9  1956 Tom Hanks
+#> 10  1956 Tom Hanks
+#> 
+#> $m
+#> # A tibble: 10 x 3
+#>    tagline                                         title           released
+#>    <chr>                                           <chr>              <int>
+#>  1 In every life there comes a time when that thi… That Thing You…     1996
+#>  2 Once in a lifetime you get a chance to do some… A League of Th…     1992
+#>  3 What if someone you never met, someone you nev… Sleepless in S…     1993
+#>  4 A stiff drink. A little mascara. A lot of nerv… Charlie Wilson…     2007
+#>  5 At the edge of the world, his journey begins.   Cast Away           2000
+#>  6 Walk a mile youll never forget.                 The Green Mile      1999
+#>  7 Break The Codes                                 The Da Vinci C…     2006
+#>  8 This Holiday Season… Believe                    The Polar Expr…     2004
+#>  9 A story of love, lava and burning desire.       Joe Versus the…     1990
+#> 10 Everything is connected                         Cloud Atlas         2012
+#> 
+#> $d
+#> # A tibble: 10 x 2
+#>     born name                
+#>    <int> <chr>               
+#>  1  1956 Tom Hanks           
+#>  2  1943 Penny Marshall      
+#>  3  1941 Nora Ephron         
+#>  4  1931 Mike Nichols        
+#>  5  1951 Robert Zemeckis     
+#>  6  1959 Frank Darabont      
+#>  7  1954 Ron Howard          
+#>  8  1951 Robert Zemeckis     
+#>  9  1950 John Patrick Stanley
+#> 10  1965 Tom Tykwer          
+#> 
+#> attr(,"class")
+#> [1] "neo"  "list"
+```
+
 ### “rows” format
 
 The user chooses whether or not to return a list of tibbles when calling
@@ -173,122 +193,200 @@ statement.
 ``` r
 library(magrittr)
 
-'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
+'MATCH (tom {name: "Tom Hanks"}) RETURN tom;' %>%
   call_neo4j(con)
-#> $b
-#> # A tibble: 14 x 2
-#>    name     formed
-#>    <chr>     <int>
-#>  1 Burzum     1991
-#>  2 Burzum     1991
-#>  3 Burzum     1991
-#>  4 Burzum     1991
-#>  5 Burzum     1991
-#>  6 Burzum     1991
-#>  7 Burzum     1991
-#>  8 Enslaved   1991
-#>  9 Enslaved   1991
-#> 10 Enslaved   1991
-#> 11 Enslaved   1991
-#> 12 Immortal   1991
-#> 13 Immortal   1991
-#> 14 Immortal   1991
-#> 
-#> $r
-#> # A tibble: 14 x 2
-#>    release name                         
-#>      <int> <chr>                        
-#>  1    1993 Filosofem                    
-#>  2    1992 Hvis lyset tar oss           
-#>  3    1992 Aske                         
-#>  4    1992 Det som engang var           
-#>  5    1992 Burzum                       
-#>  6    1991 Demo II                      
-#>  7    1991 Demo I                       
-#>  8    1992 Hordanes Land                
-#>  9    1993 Vikingligr Veldi             
-#> 10    1991 Nema                         
-#> 11    1992 Yggdrasill                   
-#> 12    1992 Diabolical Fullmoon Mysticism
-#> 13    1993 Pure Holocaust               
-#> 14    1991 Immortal                     
+#> $tom
+#> # A tibble: 1 x 2
+#>    born name     
+#>   <int> <chr>    
+#> 1  1956 Tom Hanks
 #> 
 #> attr(,"class")
-#> [1] "neo"  "neo"  "list"
+#> [1] "neo"  "list"
+
+'MATCH (cloudAtlas {title: "Cloud Atlas"}) RETURN cloudAtlas;' %>%
+  call_neo4j(con)
+#> $cloudAtlas
+#> # A tibble: 1 x 3
+#>   tagline                 title       released
+#>   <chr>                   <chr>          <int>
+#> 1 Everything is connected Cloud Atlas     2012
+#> 
+#> attr(,"class")
+#> [1] "neo"  "list"
+
+"MATCH (people:Person)-[relatedTo]-(:Movie {title: 'Cloud Atlas'}) RETURN people.name, Type(relatedTo), relatedTo" %>%
+  call_neo4j(con, type = 'row')
+#> $people.name
+#> # A tibble: 10 x 1
+#>    value           
+#>    <chr>           
+#>  1 Tom Hanks       
+#>  2 Jim Broadbent   
+#>  3 David Mitchell  
+#>  4 Tom Tykwer      
+#>  5 Lana Wachowski  
+#>  6 Stefan Arndt    
+#>  7 Jessica Thompson
+#>  8 Halle Berry     
+#>  9 Hugo Weaving    
+#> 10 Lilly Wachowski 
+#> 
+#> $`Type(relatedTo)`
+#> # A tibble: 10 x 1
+#>    value   
+#>    <chr>   
+#>  1 ACTED_IN
+#>  2 ACTED_IN
+#>  3 WROTE   
+#>  4 DIRECTED
+#>  5 DIRECTED
+#>  6 PRODUCED
+#>  7 REVIEWED
+#>  8 ACTED_IN
+#>  9 ACTED_IN
+#> 10 DIRECTED
+#> 
+#> $relatedTo
+#> # A tibble: 18 x 3
+#>    roles     summary            rating
+#>    <list>    <chr>               <int>
+#>  1 <chr [1]> <NA>                   NA
+#>  2 <chr [1]> <NA>                   NA
+#>  3 <chr [1]> <NA>                   NA
+#>  4 <chr [1]> <NA>                   NA
+#>  5 <chr [1]> <NA>                   NA
+#>  6 <chr [1]> <NA>                   NA
+#>  7 <chr [1]> <NA>                   NA
+#>  8 <NULL>    An amazing journey     95
+#>  9 <chr [1]> <NA>                   NA
+#> 10 <chr [1]> <NA>                   NA
+#> 11 <chr [1]> <NA>                   NA
+#> 12 <chr [1]> <NA>                   NA
+#> 13 <chr [1]> <NA>                   NA
+#> 14 <chr [1]> <NA>                   NA
+#> 15 <chr [1]> <NA>                   NA
+#> 16 <chr [1]> <NA>                   NA
+#> 17 <chr [1]> <NA>                   NA
+#> 18 <chr [1]> <NA>                   NA
+#> 
+#> attr(,"class")
+#> [1] "neo"  "list"
 ```
 
-By default, results are returned as an R list of tibbles. We think this
-is the more “truthful” way to implement the outputs regarding Neo4J
-calls.
+By default, results are returned as an R list of tibbles. For example
+here, `RETURN tom` will return a one element list, with object named
+`tom`. We think this is the more “truthful” way to implement the outputs
+regarding Neo4J calls.
 
-For example, when you want to return two nodes types, you’ll get two
-results, in the form of two tibbles (what we’ve seen just before) - the
-result is a two elements list with each element being labelled the way
-it has been specified in the Cypher query.
-
-Results can also be returned in
-JSON:
+When you want to return two nodes types, you’ll get two results, in the
+form of two tibbles - the result is a two elements list with each
+element being labelled the way it has been specified in the Cypher
+query.
 
 ``` r
-'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN * LIMIT 1;' %>%
-  call_neo4j(con, output = "json")
-#> [
-#>   [
-#>     {
-#>       "row": [
-#>         {
-#>           "name": ["Burzum"],
-#>           "formed": [1991]
-#>         },
-#>         {
-#>           "release": [1993],
-#>           "name": ["Filosofem"]
-#>         }
-#>       ],
-#>       "meta": [
-#>         {
-#>           "id": [16020],
-#>           "type": ["node"],
-#>           "deleted": [false]
-#>         },
-#>         {
-#>           "id": [16058],
-#>           "type": ["node"],
-#>           "deleted": [false]
-#>         }
-#>       ]
-#>     }
-#>   ]
-#> ]
+'MATCH (tom:Person {name: "Tom Hanks"})-[:ACTED_IN]->(tomHanksMovies) RETURN tom,tomHanksMovies' %>%
+  call_neo4j(con)
+#> $tom
+#> # A tibble: 12 x 2
+#>     born name     
+#>    <int> <chr>    
+#>  1  1956 Tom Hanks
+#>  2  1956 Tom Hanks
+#>  3  1956 Tom Hanks
+#>  4  1956 Tom Hanks
+#>  5  1956 Tom Hanks
+#>  6  1956 Tom Hanks
+#>  7  1956 Tom Hanks
+#>  8  1956 Tom Hanks
+#>  9  1956 Tom Hanks
+#> 10  1956 Tom Hanks
+#> 11  1956 Tom Hanks
+#> 12  1956 Tom Hanks
+#> 
+#> $tomHanksMovies
+#> # A tibble: 12 x 3
+#>    tagline                                         title           released
+#>    <chr>                                           <chr>              <int>
+#>  1 Houston, we have a problem.                     Apollo 13           1995
+#>  2 At odds in life... in love on-line.             Youve Got Mail      1998
+#>  3 Once in a lifetime you get a chance to do some… A League of Th…     1992
+#>  4 A story of love, lava and burning desire.       Joe Versus the…     1990
+#>  5 In every life there comes a time when that thi… That Thing You…     1996
+#>  6 Break The Codes                                 The Da Vinci C…     2006
+#>  7 Everything is connected                         Cloud Atlas         2012
+#>  8 At the edge of the world, his journey begins.   Cast Away           2000
+#>  9 Walk a mile youll never forget.                 The Green Mile      1999
+#> 10 What if someone you never met, someone you nev… Sleepless in S…     1993
+#> 11 This Holiday Season… Believe                    The Polar Expr…     2004
+#> 12 A stiff drink. A little mascara. A lot of nerv… Charlie Wilson…     2007
+#> 
+#> attr(,"class")
+#> [1] "neo"  "list"
+```
+
+Results can also be returned in JSON, for example for writing to a file:
+
+``` r
+tmp <- tempfile(fileext = ".json")
+'MATCH (people:Person) RETURN people.name LIMIT 1' %>%
+  call_neo4j(con, output = "json") %>%
+  write(tmp)
+jsonlite::read_json(tmp)
+#> [[1]]
+#> [[1]][[1]]
+#> [[1]][[1]]$row
+#> [[1]][[1]]$row[[1]]
+#> [[1]][[1]]$row[[1]][[1]]
+#> [1] "Keanu Reeves"
+#> 
+#> 
+#> 
+#> [[1]][[1]]$meta
+#> [[1]][[1]]$meta[[1]]
+#> named list()
 ```
 
 If you turn the `type` argument to `"graph"`, you’ll get a graph
 result:
 
 ``` r
-'MATCH (r:record) -[:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
+'MATCH (tom:Person {name: "Tom Hanks"})-[act:ACTED_IN]->(tomHanksMovies) RETURN act,tom,tomHanksMovies' %>%
   call_neo4j(con, type = "graph")
 #> $nodes
-#> # A tibble: 17 x 3
+#> # A tibble: 13 x 3
 #>    id    label     properties
 #>    <chr> <list>    <list>    
-#>  1 16020 <chr [1]> <list [2]>
-#>  2 16058 <chr [1]> <list [2]>
-#>  3 16053 <chr [1]> <list [2]>
-#>  4 16051 <chr [1]> <list [2]>
-#>  5 16045 <chr [1]> <list [2]>
-#>  6 16044 <chr [1]> <list [2]>
-#>  7 16042 <chr [1]> <list [2]>
-#>  8 16039 <chr [1]> <list [2]>
-#>  9 16055 <chr [1]> <list [2]>
-#> 10 16024 <chr [1]> <list [2]>
-#> 11 16060 <chr [1]> <list [2]>
-#> 12 16043 <chr [1]> <list [2]>
-#> 13 16049 <chr [1]> <list [2]>
-#> 14 16027 <chr [1]> <list [2]>
-#> 15 16046 <chr [1]> <list [2]>
-#> 16 16066 <chr [1]> <list [2]>
-#> 17 16041 <chr [1]> <list [2]>
+#>  1 144   <chr [1]> <list [3]>
+#>  2 71    <chr [1]> <list [2]>
+#>  3 67    <chr [1]> <list [3]>
+#>  4 162   <chr [1]> <list [3]>
+#>  5 78    <chr [1]> <list [3]>
+#>  6 85    <chr [1]> <list [3]>
+#>  7 111   <chr [1]> <list [3]>
+#>  8 105   <chr [1]> <list [3]>
+#>  9 150   <chr [1]> <list [3]>
+#> 10 130   <chr [1]> <list [3]>
+#> 11 73    <chr [1]> <list [3]>
+#> 12 161   <chr [1]> <list [3]>
+#> 13 159   <chr [1]> <list [3]>
+#> 
+#> $relationships
+#> # A tibble: 12 x 5
+#>    id    type     startNode endNode properties
+#>    <chr> <chr>    <chr>     <chr>   <list>    
+#>  1 202   ACTED_IN 71        144     <list [1]>
+#>  2 84    ACTED_IN 71        67      <list [1]>
+#>  3 234   ACTED_IN 71        162     <list [1]>
+#>  4 98    ACTED_IN 71        78      <list [1]>
+#>  5 110   ACTED_IN 71        85      <list [1]>
+#>  6 146   ACTED_IN 71        111     <list [1]>
+#>  7 137   ACTED_IN 71        105     <list [1]>
+#>  8 213   ACTED_IN 71        150     <list [1]>
+#>  9 182   ACTED_IN 71        130     <list [1]>
+#> 10 91    ACTED_IN 71        73      <list [1]>
+#> 11 232   ACTED_IN 71        161     <list [1]>
+#> 12 228   ACTED_IN 71        159     <list [1]>
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -306,116 +404,98 @@ We have designed several functions to unnest the output :
 :
 
 ``` r
-res <- 'MATCH (r:record) -[w:WAS_RECORDED] -> (b:Band) where b.formed = 1991 RETURN *;' %>%
+res <- 'MATCH (tom:Person {name:"Tom Hanks"})-[a:ACTED_IN]->(m)<-[:ACTED_IN]-(coActors) RETURN m AS acted,coActors.name' %>%
   call_neo4j(con, type = "graph")
 unnest_nodes(res$nodes)
-#> # A tibble: 17 x 5
-#>    id    value  name                          formed release
-#>    <chr> <chr>  <chr>                          <int>   <int>
-#>  1 16020 Band   Burzum                          1991      NA
-#>  2 16058 record Filosofem                         NA    1993
-#>  3 16053 record Hvis lyset tar oss                NA    1992
-#>  4 16051 record Aske                              NA    1992
-#>  5 16045 record Det som engang var                NA    1992
-#>  6 16044 record Burzum                            NA    1992
-#>  7 16042 record Demo II                           NA    1991
-#>  8 16039 record Demo I                            NA    1991
-#>  9 16055 record Hordanes Land                     NA    1992
-#> 10 16024 Band   Enslaved                        1991      NA
-#> 11 16060 record Vikingligr Veldi                  NA    1993
-#> 12 16043 record Nema                              NA    1991
-#> 13 16049 record Yggdrasill                        NA    1992
-#> 14 16027 Band   Immortal                        1991      NA
-#> 15 16046 record Diabolical Fullmoon Mysticism     NA    1992
-#> 16 16066 record Pure Holocaust                    NA    1993
-#> 17 16041 record Immortal                          NA    1991
+#> # A tibble: 11 x 5
+#>    id    value tagline                                title        released
+#>    <chr> <chr> <chr>                                  <chr>           <int>
+#>  1 144   Movie Houston, we have a problem.            Apollo 13        1995
+#>  2 67    Movie At odds in life... in love on-line.    Youve Got M…     1998
+#>  3 162   Movie Once in a lifetime you get a chance t… A League of…     1992
+#>  4 78    Movie A story of love, lava and burning des… Joe Versus …     1990
+#>  5 85    Movie In every life there comes a time when… That Thing …     1996
+#>  6 111   Movie Break The Codes                        The Da Vinc…     2006
+#>  7 105   Movie Everything is connected                Cloud Atlas      2012
+#>  8 150   Movie At the edge of the world, his journey… Cast Away        2000
+#>  9 130   Movie Walk a mile youll never forget.        The Green M…     1999
+#> 10 73    Movie What if someone you never met, someon… Sleepless i…     1993
+#> 11 159   Movie A stiff drink. A little mascara. A lo… Charlie Wil…     2007
 ```
 
 Please, note that this function will return `NA` for the properties that
-aren’t in a node. For example here, we have no ‘licence’ information for
-the Maintainer node (that makes sense).
-
-On the long run, and this is not {neo4r} specific but Neo4J related, a
-good practice is to have a “name” propertie on each node, so this column
-will be full here.
+aren’t in a node.
 
 Also, it is possible to unnest either the properties or the labels :
 
 ``` r
-res$nodes %>%
+res %>%
+  extract_nodes() %>%
   unnest_nodes(what = "properties")
-#> # A tibble: 17 x 5
-#>    id    label     name                          formed release
-#>    <chr> <list>    <chr>                          <int>   <int>
-#>  1 16020 <chr [1]> Burzum                          1991      NA
-#>  2 16058 <chr [1]> Filosofem                         NA    1993
-#>  3 16053 <chr [1]> Hvis lyset tar oss                NA    1992
-#>  4 16051 <chr [1]> Aske                              NA    1992
-#>  5 16045 <chr [1]> Det som engang var                NA    1992
-#>  6 16044 <chr [1]> Burzum                            NA    1992
-#>  7 16042 <chr [1]> Demo II                           NA    1991
-#>  8 16039 <chr [1]> Demo I                            NA    1991
-#>  9 16055 <chr [1]> Hordanes Land                     NA    1992
-#> 10 16024 <chr [1]> Enslaved                        1991      NA
-#> 11 16060 <chr [1]> Vikingligr Veldi                  NA    1993
-#> 12 16043 <chr [1]> Nema                              NA    1991
-#> 13 16049 <chr [1]> Yggdrasill                        NA    1992
-#> 14 16027 <chr [1]> Immortal                        1991      NA
-#> 15 16046 <chr [1]> Diabolical Fullmoon Mysticism     NA    1992
-#> 16 16066 <chr [1]> Pure Holocaust                    NA    1993
-#> 17 16041 <chr [1]> Immortal                          NA    1991
+#> # A tibble: 11 x 5
+#>    id    label   tagline                              title        released
+#>    <chr> <list>  <chr>                                <chr>           <int>
+#>  1 144   <chr [… Houston, we have a problem.          Apollo 13        1995
+#>  2 67    <chr [… At odds in life... in love on-line.  Youve Got M…     1998
+#>  3 162   <chr [… Once in a lifetime you get a chance… A League of…     1992
+#>  4 78    <chr [… A story of love, lava and burning d… Joe Versus …     1990
+#>  5 85    <chr [… In every life there comes a time wh… That Thing …     1996
+#>  6 111   <chr [… Break The Codes                      The Da Vinc…     2006
+#>  7 105   <chr [… Everything is connected              Cloud Atlas      2012
+#>  8 150   <chr [… At the edge of the world, his journ… Cast Away        2000
+#>  9 130   <chr [… Walk a mile youll never forget.      The Green M…     1999
+#> 10 73    <chr [… What if someone you never met, some… Sleepless i…     1993
+#> 11 159   <chr [… A stiff drink. A little mascara. A … Charlie Wil…     2007
 ```
 
 ``` r
-res$nodes %>%
+res %>%
+  extract_nodes() %>%
   unnest_nodes(what = "label")
-#> # A tibble: 17 x 3
-#>    id    properties value 
-#>    <chr> <list>     <chr> 
-#>  1 16020 <list [2]> Band  
-#>  2 16058 <list [2]> record
-#>  3 16053 <list [2]> record
-#>  4 16051 <list [2]> record
-#>  5 16045 <list [2]> record
-#>  6 16044 <list [2]> record
-#>  7 16042 <list [2]> record
-#>  8 16039 <list [2]> record
-#>  9 16055 <list [2]> record
-#> 10 16024 <list [2]> Band  
-#> 11 16060 <list [2]> record
-#> 12 16043 <list [2]> record
-#> 13 16049 <list [2]> record
-#> 14 16027 <list [2]> Band  
-#> 15 16046 <list [2]> record
-#> 16 16066 <list [2]> record
-#> 17 16041 <list [2]> record
+#> # A tibble: 11 x 3
+#>    id    properties value
+#>    <chr> <list>     <chr>
+#>  1 144   <list [3]> Movie
+#>  2 67    <list [3]> Movie
+#>  3 162   <list [3]> Movie
+#>  4 78    <list [3]> Movie
+#>  5 85    <list [3]> Movie
+#>  6 111   <list [3]> Movie
+#>  7 105   <list [3]> Movie
+#>  8 150   <list [3]> Movie
+#>  9 130   <list [3]> Movie
+#> 10 73    <list [3]> Movie
+#> 11 159   <list [3]> Movie
 ```
 
   - `unnest_relationships()`
 
 There is only one nested column in the relationship table, thus the
-function is quite straightforward :
+function is quite straightforward
+:
 
 ``` r
-unnest_relationships(res$relationships)
-#> # A tibble: 14 x 5
-#>    id    type         startNode endNode value
-#>    <chr> <chr>        <chr>     <chr>   <lgl>
-#>  1 23757 WAS_RECORDED 16058     16020   NA   
-#>  2 23756 WAS_RECORDED 16053     16020   NA   
-#>  3 23755 WAS_RECORDED 16051     16020   NA   
-#>  4 23754 WAS_RECORDED 16045     16020   NA   
-#>  5 23753 WAS_RECORDED 16044     16020   NA   
-#>  6 23752 WAS_RECORDED 16042     16020   NA   
-#>  7 23751 WAS_RECORDED 16039     16020   NA   
-#>  8 23766 WAS_RECORDED 16055     16024   NA   
-#>  9 23767 WAS_RECORDED 16060     16024   NA   
-#> 10 23764 WAS_RECORDED 16043     16024   NA   
-#> 11 23765 WAS_RECORDED 16049     16024   NA   
-#> 12 23762 WAS_RECORDED 16046     16027   NA   
-#> 13 23763 WAS_RECORDED 16066     16027   NA   
-#> 14 23761 WAS_RECORDED 16041     16027   NA
+'MATCH (people:Person)-[relatedTo]-(:Movie {title: "Cloud Atlas"}) RETURN people.name, Type(relatedTo), relatedTo' %>%
+  call_neo4j(con, type = "graph") %>%
+  extract_relationships() %>%
+  unnest_relationships()
+#> # A tibble: 23 x 8
+#>    id    type     startNode endNode roles     value summary rating
+#>    <chr> <chr>    <chr>     <chr>   <list>    <lgl> <chr>    <int>
+#>  1 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  2 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  3 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  4 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  5 140   ACTED_IN 107       105     <chr [1]> NA    <NA>        NA
+#>  6 140   ACTED_IN 107       105     <chr [1]> NA    <NA>        NA
+#>  7 140   ACTED_IN 107       105     <chr [1]> NA    <NA>        NA
+#>  8 144   WROTE    109       105     <NULL>    NA    <NA>        NA
+#>  9 141   DIRECTED 108       105     <NULL>    NA    <NA>        NA
+#> 10 143   DIRECTED 6         105     <NULL>    NA    <NA>        NA
+#> # … with 13 more rows
 ```
+
+Note that `unnest_relationships()` only does one level of unnesting.
 
   - `unnest_graph`
 
@@ -423,47 +503,40 @@ This function takes a graph results, and does `unnest_nodes` and
 `unnest_relationships`.
 
 ``` r
-unnest_graph(res)
+'MATCH (people:Person)-[relatedTo]-(:Movie {title: "Cloud Atlas"}) RETURN people.name, Type(relatedTo), relatedTo' %>%
+  call_neo4j(con, type = "graph") %>%
+  unnest_graph()
 #> $nodes
-#> # A tibble: 17 x 5
-#>    id    value  name                          formed release
-#>    <chr> <chr>  <chr>                          <int>   <int>
-#>  1 16020 Band   Burzum                          1991      NA
-#>  2 16058 record Filosofem                         NA    1993
-#>  3 16053 record Hvis lyset tar oss                NA    1992
-#>  4 16051 record Aske                              NA    1992
-#>  5 16045 record Det som engang var                NA    1992
-#>  6 16044 record Burzum                            NA    1992
-#>  7 16042 record Demo II                           NA    1991
-#>  8 16039 record Demo I                            NA    1991
-#>  9 16055 record Hordanes Land                     NA    1992
-#> 10 16024 Band   Enslaved                        1991      NA
-#> 11 16060 record Vikingligr Veldi                  NA    1993
-#> 12 16043 record Nema                              NA    1991
-#> 13 16049 record Yggdrasill                        NA    1992
-#> 14 16027 Band   Immortal                        1991      NA
-#> 15 16046 record Diabolical Fullmoon Mysticism     NA    1992
-#> 16 16066 record Pure Holocaust                    NA    1993
-#> 17 16041 record Immortal                          NA    1991
+#> # A tibble: 11 x 7
+#>    id    value   born name           tagline             title     released
+#>    <chr> <chr>  <int> <chr>          <chr>               <chr>        <int>
+#>  1 71    Person  1956 Tom Hanks      <NA>                <NA>            NA
+#>  2 105   Movie     NA <NA>           Everything is conn… Cloud At…     2012
+#>  3 107   Person  1949 Jim Broadbent  <NA>                <NA>            NA
+#>  4 109   Person  1969 David Mitchell <NA>                <NA>            NA
+#>  5 108   Person  1965 Tom Tykwer     <NA>                <NA>            NA
+#>  6 6     Person  1965 Lana Wachowski <NA>                <NA>            NA
+#>  7 110   Person  1961 Stefan Arndt   <NA>                <NA>            NA
+#>  8 169   Person    NA Jessica Thomp… <NA>                <NA>            NA
+#>  9 106   Person  1966 Halle Berry    <NA>                <NA>            NA
+#> 10 4     Person  1960 Hugo Weaving   <NA>                <NA>            NA
+#> 11 5     Person  1967 Lilly Wachows… <NA>                <NA>            NA
 #> 
 #> $relationships
-#> # A tibble: 14 x 5
-#>    id    type         startNode endNode value
-#>    <chr> <chr>        <chr>     <chr>   <lgl>
-#>  1 23757 WAS_RECORDED 16058     16020   NA   
-#>  2 23756 WAS_RECORDED 16053     16020   NA   
-#>  3 23755 WAS_RECORDED 16051     16020   NA   
-#>  4 23754 WAS_RECORDED 16045     16020   NA   
-#>  5 23753 WAS_RECORDED 16044     16020   NA   
-#>  6 23752 WAS_RECORDED 16042     16020   NA   
-#>  7 23751 WAS_RECORDED 16039     16020   NA   
-#>  8 23766 WAS_RECORDED 16055     16024   NA   
-#>  9 23767 WAS_RECORDED 16060     16024   NA   
-#> 10 23764 WAS_RECORDED 16043     16024   NA   
-#> 11 23765 WAS_RECORDED 16049     16024   NA   
-#> 12 23762 WAS_RECORDED 16046     16027   NA   
-#> 13 23763 WAS_RECORDED 16066     16027   NA   
-#> 14 23761 WAS_RECORDED 16041     16027   NA   
+#> # A tibble: 23 x 8
+#>    id    type     startNode endNode roles     value summary rating
+#>    <chr> <chr>    <chr>     <chr>   <list>    <lgl> <chr>    <int>
+#>  1 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  2 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  3 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  4 137   ACTED_IN 71        105     <chr [1]> NA    <NA>        NA
+#>  5 140   ACTED_IN 107       105     <chr [1]> NA    <NA>        NA
+#>  6 140   ACTED_IN 107       105     <chr [1]> NA    <NA>        NA
+#>  7 140   ACTED_IN 107       105     <chr [1]> NA    <NA>        NA
+#>  8 144   WROTE    109       105     <NULL>    NA    <NA>        NA
+#>  9 141   DIRECTED 108       105     <NULL>    NA    <NA>        NA
+#> 10 143   DIRECTED 6         105     <NULL>    NA    <NA>        NA
+#> # … with 13 more rows
 #> 
 #> attr(,"class")
 #> [1] "neo"  "list"
@@ -471,35 +544,43 @@ unnest_graph(res)
 
 ### Extraction
 
-There are two convenient functions to extract nodes and relationships:
+There are two convenient functions to extract nodes and
+relationships:
 
 ``` r
-'MATCH p=()-[r:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+'MATCH (bacon:Person {name:"Kevin Bacon"})-[*1..4]-(hollywood) RETURN DISTINCT hollywood' %>%
   call_neo4j(con, type = "graph") %>% 
   extract_nodes()
-#> # A tibble: 6 x 3
-#>   id    label     properties
-#>   <chr> <list>    <list>    
-#> 1 16020 <chr [1]> <list [2]>
-#> 2 16058 <chr [1]> <list [2]>
-#> 3 16053 <chr [1]> <list [2]>
-#> 4 16051 <chr [1]> <list [2]>
-#> 5 16045 <chr [1]> <list [2]>
-#> 6 16044 <chr [1]> <list [2]>
+#> # A tibble: 135 x 3
+#>    id    label     properties
+#>    <chr> <list>    <list>    
+#>  1 72    <chr [1]> <list [2]>
+#>  2 68    <chr [1]> <list [2]>
+#>  3 54    <chr [1]> <list [2]>
+#>  4 34    <chr [1]> <list [2]>
+#>  5 70    <chr [1]> <list [2]>
+#>  6 69    <chr [1]> <list [2]>
+#>  7 67    <chr [1]> <list [3]>
+#>  8 163   <chr [1]> <list [2]>
+#>  9 166   <chr [1]> <list [2]>
+#> 10 77    <chr [1]> <list [2]>
+#> # … with 125 more rows
 ```
 
 ``` r
-'MATCH p=()-[w:WAS_RECORDED]->() RETURN p LIMIT 5;' %>%
+'MATCH p=shortestPath(
+  (bacon:Person {name:"Kevin Bacon"})-[*]-(meg:Person {name:"Meg Ryan"})
+)
+RETURN p' %>%
   call_neo4j(con, type = "graph") %>% 
   extract_relationships()
-#> # A tibble: 5 x 5
-#>   id    type         startNode endNode properties
-#>   <chr> <chr>        <chr>     <chr>   <list>    
-#> 1 23757 WAS_RECORDED 16058     16020   <list [0]>
-#> 2 23756 WAS_RECORDED 16053     16020   <list [0]>
-#> 3 23755 WAS_RECORDED 16051     16020   <list [0]>
-#> 4 23754 WAS_RECORDED 16045     16020   <list [0]>
-#> 5 23753 WAS_RECORDED 16044     16020   <list [0]>
+#> # A tibble: 4 x 5
+#>   id    type     startNode endNode properties
+#>   <chr> <chr>    <chr>     <chr>   <list>    
+#> 1 202   ACTED_IN 71        144     <list [1]>
+#> 2 203   ACTED_IN 19        144     <list [1]>
+#> 3 91    ACTED_IN 71        73      <list [1]>
+#> 4 92    ACTED_IN 34        73      <list [1]>
 ```
 
 ## Convert for common graph packages
@@ -546,14 +627,14 @@ G$nodes <- G$nodes %>%
   mutate(label = map_chr(label, 1))
 head(G$nodes)
 #> # A tibble: 6 x 7
-#>   id    label   born name    tagline                    title      released
-#>   <chr> <chr>  <int> <chr>   <chr>                      <chr>         <int>
-#> 1 16149 Person  1956 Tom Ha… <NA>                       <NA>             NA
-#> 2 16189 Movie     NA <NA>    Break The Codes            The Da Vi…     2006
-#> 3 16208 Movie     NA <NA>    Walk a mile you'll never … The Green…     1999
-#> 4 16228 Movie     NA <NA>    At the edge of the world,… Cast Away      2000
-#> 5 16222 Movie     NA <NA>    Houston, we have a proble… Apollo 13      1995
-#> 6 16240 Movie     NA <NA>    Once in a lifetime you ge… A League …     1992
+#>   id    label  tagline                     title      released  born name  
+#>   <chr> <chr>  <chr>                       <chr>         <int> <int> <chr> 
+#> 1 144   Movie  Houston, we have a problem. Apollo 13      1995    NA <NA>  
+#> 2 71    Person <NA>                        <NA>             NA  1956 Tom H…
+#> 3 67    Movie  At odds in life... in love… Youve Got…     1998    NA <NA>  
+#> 4 162   Movie  Once in a lifetime you get… A League …     1992    NA <NA>  
+#> 5 78    Movie  A story of love, lava and … Joe Versu…     1990    NA <NA>  
+#> 6 85    Movie  In every life there comes … That Thin…     1996    NA <NA>
 ```
 
 We then reorder the relationnship table:
@@ -561,17 +642,18 @@ We then reorder the relationnship table:
 ``` r
 G$relationships <- G$relationships %>%
   unnest_relationships() %>%
-  select(startNode, endNode, type, everything())
+  select(startNode, endNode, type, everything()) %>%
+  mutate(roles = unlist(roles))
 head(G$relationships)
 #> # A tibble: 6 x 5
 #>   startNode endNode type     id    roles             
 #>   <chr>     <chr>   <chr>    <chr> <chr>             
-#> 1 16149     16189   ACTED_IN 23940 Dr. Robert Langdon
-#> 2 16149     16208   ACTED_IN 23996 Paul Edgecomb     
-#> 3 16149     16228   ACTED_IN 24027 Chuck Noland      
-#> 4 16149     16222   ACTED_IN 24016 Jim Lovell        
-#> 5 16149     16240   ACTED_IN 24048 Jimmy Dugan       
-#> 6 16149     16239   ACTED_IN 24046 Hero Boy
+#> 1 71        144     ACTED_IN 202   Jim Lovell        
+#> 2 71        67      ACTED_IN 84    Joe Fox           
+#> 3 71        162     ACTED_IN 234   Jimmy Dugan       
+#> 4 71        78      ACTED_IN 98    Joe Banks         
+#> 5 71        85      ACTED_IN 110   Mr. White         
+#> 6 71        111     ACTED_IN 146   Dr. Robert Langdon
 ```
 
 ``` r
@@ -583,7 +665,7 @@ graph_object <- igraph::graph_from_data_frame(
 plot(graph_object)
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
 
 This can also be used with `{ggraph}` :
 
@@ -598,7 +680,7 @@ graph_object %>%
 #> Using `nicely` as default layout
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
 ### {visNetwork}
 
@@ -704,6 +786,59 @@ read_cypher("data-raw/create.cypher")
 
 ``` r
 send_cypher("data-raw/constraints.cypher", con)
+#> No data returned.
+#> No data returned.
+#> No data returned.
+#> [[1]]
+#> # A tibble: 12 x 2
+#>    type                  value
+#>    <chr>                 <dbl>
+#>  1 contains_updates          1
+#>  2 nodes_created             0
+#>  3 nodes_deleted             0
+#>  4 properties_set            0
+#>  5 relationships_created     0
+#>  6 relationship_deleted      0
+#>  7 labels_added              0
+#>  8 labels_removed            0
+#>  9 indexes_added             0
+#> 10 indexes_removed           0
+#> 11 constraints_added         1
+#> 12 constraints_removed       0
+#> 
+#> [[2]]
+#> # A tibble: 12 x 2
+#>    type                  value
+#>    <chr>                 <dbl>
+#>  1 contains_updates          1
+#>  2 nodes_created             0
+#>  3 nodes_deleted             0
+#>  4 properties_set            0
+#>  5 relationships_created     0
+#>  6 relationship_deleted      0
+#>  7 labels_added              0
+#>  8 labels_removed            0
+#>  9 indexes_added             0
+#> 10 indexes_removed           0
+#> 11 constraints_added         1
+#> 12 constraints_removed       0
+#> 
+#> [[3]]
+#> # A tibble: 12 x 2
+#>    type                  value
+#>    <chr>                 <dbl>
+#>  1 contains_updates          1
+#>  2 nodes_created             0
+#>  3 nodes_deleted             0
+#>  4 properties_set            0
+#>  5 relationships_created     0
+#>  6 relationship_deleted      0
+#>  7 labels_added              0
+#>  8 labels_removed            0
+#>  9 indexes_added             0
+#> 10 indexes_removed           0
+#> 11 constraints_added         1
+#> 12 constraints_removed       0
 ```
 
 ### Sending csv dataframe to Neo4J
@@ -722,86 +857,45 @@ The args are :
   - `include_stats` : whether or not to include the stats
   - `meta` : whether or not to return the meta information
 
-<!-- end list -->
+Let’s use Neo4J `northwind-graph` example for that.
 
 ``` r
-# Create the constraints
-call_neo4j("CREATE CONSTRAINT ON (a:artist) ASSERT a.name IS UNIQUE;", con)
-call_neo4j("CREATE CONSTRAINT ON (al:album) ASSERT al.name IS UNIQUE;", con)
-```
-
-``` r
-# List constaints (if any)
-con$get_constraints()
-#>         label       type property_keys
-#> 1:       Band UNIQUENESS          name
-#> 2:     record UNIQUENESS          name
-#> 3:     Author UNIQUENESS          name
-#> 4:       City UNIQUENESS          name
-#> 5:     artist UNIQUENESS          name
-#> 6:    Package UNIQUENESS          name
-#> 7: Maintainer UNIQUENESS          name
 # Create the query that will create the nodes and relationships
-on_load_query <- 'MERGE (a:artist { name: csvLine.artist})
-MERGE (al:album {name: csvLine.album_name})
-MERGE (a) -[:has_recorded] -> (al)  
-RETURN a AS artists, al AS albums;'
+on_load_query <- 'CREATE (n:Product)
+  SET n = row,
+  n.unitPrice = toFloat(row.unitPrice),
+  n.unitsInStock = toInteger(row.unitsInStock), n.unitsOnOrder = toInteger(row.unitsOnOrder),
+  n.reorderLevel = toInteger(row.reorderLevel), n.discontinued = (row.discontinued <> "0");'
 # Send the csv 
-load_csv(url = "https://raw.githubusercontent.com/ThinkR-open/datasets/master/tracks.csv", 
+load_csv(url = "http://data.neo4j.com/northwind/products.csv", 
          con = con, header = TRUE, periodic_commit = 50, 
-         as = "csvLine", on_load = on_load_query)
-#> $artists
-#> # A tibble: 2,367 x 1
-#>    name           
-#>    <chr>          
-#>  1 Eminem         
-#>  2 Eurythmics     
-#>  3 Queen          
-#>  4 The Police     
-#>  5 A$AP Rocky     
-#>  6 Tears For Fears
-#>  7 Foals          
-#>  8 Bag Raiders    
-#>  9 Bright Eyes    
-#> 10 Bob Dylan      
-#> # … with 2,357 more rows
-#> 
-#> $albums
-#> # A tibble: 2,367 x 1
-#>    name                           
-#>    <chr>                          
-#>  1 Curtain Call (Deluxe)          
-#>  2 Sweet Dreams (Are Made Of This)
-#>  3 The Game (2011 Remaster)       
-#>  4 Synchronicity (Remastered)     
-#>  5 LONG.LIVE.A$AP (Deluxe Version)
-#>  6 Songs From The Big Chair       
-#>  7 Holy Fire                      
-#>  8 Bag Raiders (Deluxe)           
-#>  9 I'm Wide Awake, It's Morning   
-#> 10 Highway 61 Revisited           
-#> # … with 2,357 more rows
-#> 
-#> $stats
+         as = "row", on_load = on_load_query)
+#> No data returned.
 #> # A tibble: 12 x 2
 #>    type                  value
 #>    <chr>                 <dbl>
-#>  1 contains_updates          0
-#>  2 nodes_created             0
+#>  1 contains_updates          1
+#>  2 nodes_created            77
 #>  3 nodes_deleted             0
-#>  4 properties_set            0
+#>  4 properties_set         1155
 #>  5 relationships_created     0
 #>  6 relationship_deleted      0
-#>  7 labels_added              0
+#>  7 labels_added             77
 #>  8 labels_removed            0
 #>  9 indexes_added             0
 #> 10 indexes_removed           0
 #> 11 constraints_added         0
 #> 12 constraints_removed       0
-#> 
-#> attr(,"class")
-#> [1] "neo"  "list"
 ```
+
+### Using the Connection Pane
+
+`{neo4r}` comes with a Connection Pane interface for RStudio.
+
+Once installed, you can go to the “Connections”, and use the widget to
+connect to the Neo4J server:
+
+![](readmefigs/connectionpane.png)
 
 ## Sandboxing in Docker
 

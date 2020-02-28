@@ -65,15 +65,10 @@ na_or_self <- function(x) {
 #'
 
 unnest_relationships <- function(relationships_tbl) {
+
   relationships_tbl$properties <- map(relationships_tbl$properties, na_or_self)
   relationships_tbl$properties <- map(relationships_tbl$properties, as_tibble)
-  relationships_tbl <- unnest(relationships_tbl, properties)
-  while (
-    any( map_chr(relationships_tbl, class) == "list" )
-  ) {
-    relationships_tbl <- unnest(relationships_tbl)
-  }
-  relationships_tbl
+  unnest(relationships_tbl, properties)
 }
 
 #' Unnest both relationships and nodes
@@ -85,7 +80,11 @@ unnest_relationships <- function(relationships_tbl) {
 #'
 
 unnest_graph <- function(res) {
-  res$nodes <- unnest_nodes(res$nodes)
-  res$relationships <- unnest_relationships(res$relationships)
+  if (!is.null(res$nodes)){
+    res$nodes <- unnest_nodes(res$nodes)
+  }
+  if (!is.null(res$relationships)){
+    res$relationships <- unnest_relationships(res$relationships)
+  }
   res
 }
