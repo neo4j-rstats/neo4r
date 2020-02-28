@@ -26,38 +26,57 @@ parse_row <- function(
   include_stats,
   stats,
   meta,
-  res_meta
+  res_meta,
+  format
 ){
-  # Type = row
-  # Special case for handling arrays
-  # browser()
-  res <- attempt::attempt({
-    purrr::map_depth(res_data, 3, tibble::as_tibble) %>%
-      purrr::map(purrr::flatten) %>%
-      purrr::transpose() %>%
-      purrr::map(rbindlist_to_tibble)
-  }, silent = TRUE)
-  if (class(res)[1] == "try-error") {
-    res <- flatten(res_data) %>%
-      purrr::map_dfr(purrr::flatten_dfc) %>%
-      list()
-  }
-  if (length(res_data) != 0){
-    res <- res %>%
-      setNames(res_names)
-  }
+  if (type == "row" & format == "std") {
+    # Type = row
+    # Special case for handling arrays
+    # browser()
+    res <- attempt::attempt({
+      purrr::map_depth(res_data, 3, tibble::as_tibble) %>%
+        purrr::map(purrr::flatten) %>%
+        purrr::transpose() %>%
+        purrr::map(rbindlist_to_tibble)
+    }, silent = TRUE)
+    if (class(res)[1] == "try-error") {
+      res <- flatten(res_data) %>%
+        purrr::map_dfr(purrr::flatten_dfc) %>%
+        list()
+    }
+    if (length(res_data) != 0){
+      res <- res %>%
+        setNames(res_names)
+    }
 
-  if (include_stats) {
-    res <- c(res, list(stats = stats))
-  } else {
+    if (include_stats) {
+      res <- c(res, list(stats = stats))
+    } else {
+      class(res) <- c("neo", class(res))
+    }
+
+    if (meta) {
+      res <- c(res, res_meta)
+    }
     class(res) <- c("neo", class(res))
-  }
+    return(res)
 
-  if (meta) {
-    res <- c(res, res_meta)
+  } else if (type == "row" & format == "table") {
+
+    res <- res_data %>% purrr::map("row")
+    res <- res %>% map(magrittr::set_names, res_names) %>% map(as_tibble) %>% bind_rows()
+    res <- list(results = res)
+
+    if (include_stats) {
+      res <- c(res, list(stats = stats))
+    }
+
+    if (meta) {
+      res <- c(res, res_meta)
+    }
+
+    return(res)
   }
-  class(res) <- unique(c("neo", class(res)))
-  return(res)
 }
 
 parse_graph <- function(
@@ -197,7 +216,8 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
         include_stats,
         stats,
         meta,
-        res_meta
+        res_meta,
+        format
       )
     )
   } else if (type == "graph") {
