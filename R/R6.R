@@ -2,7 +2,7 @@
 #'
 #' @section Methods:
 #' \describe{
-#' \item{\code{access}}{list url, user and password}
+#' \item{\code{access}}{list url,db, user and password}
 #' \item{\code{ping}}{test your connexion}
 #' \item{\code{version}}{Neo4J version}
 #' \item{\code{get}}{Get a list of either relationship, labels, }
@@ -31,7 +31,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' con <- neo4j_api$new(url = "http://localhost:7474", user = "neo4j", password = "password")
+#' con <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j", password = "password")
 #' }
 #'
 #'
@@ -57,7 +57,7 @@ neo4j_api <- R6::R6Class(
         cat("(Wrong credentials or hostname)\n")
       }
     },
-    initialize = function(url, user, password) {
+    initialize = function(url, db, user, password) {
       # browser()
       # Clean url in case it ends with a /
       if (grepl("bolt", url)) {
@@ -72,6 +72,7 @@ neo4j_api <- R6::R6Class(
       url <- gsub("(.*)/$", "\\1", url)
       self$url <- url
       self$user <- user
+      self$db <- db
       private$password <- password
       self$auth <- base64_enc(paste0(user, ":", password))
     },
@@ -93,6 +94,9 @@ neo4j_api <- R6::R6Class(
         user = self$user
       )
     },
+    # In 4.0 the endpoints have changed.  Instead we will call
+    # the appropriate cypher or function
+    #
     # Test if the endpoint is accessible
     # This only return the status code for now so I wonder
     # if we should make if verbose instead of just returning SC
@@ -102,22 +106,26 @@ neo4j_api <- R6::R6Class(
     },
     # Get Neo4J version
     get_version = function() {
-      res <- get_wrapper(self, "db/data")
+      #hitting the base url should reply back with some version info
+      res <- get_wrapper(self, "")
       content(res)$neo4j_version
     },
     # Get a list of relationship registered in the db
     # return it as a data.frame because data.frame are cool
     get_relationships = function() {
+      # cypher is call db.relationshipTypes
       res <- get_wrapper(self, "db/data/relationship/types")
       tibble(labels = as.character(content(res)))
     },
     # Get a list of labels registered in the db
     # Tibbles are awesome
     get_labels = function() {
+      # call db.labels()
       res <- get_wrapper(self, "db/data/labels")
       tibble(labels = as.character(content(res)))
     },
     get_property_keys = function() {
+      #call db.properKeys()
       res <- get_wrapper(self, "db/data/propertykeys")
       tibble(labels = as.character(content(res)))
     },
