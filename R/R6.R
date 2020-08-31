@@ -43,6 +43,7 @@ neo4j_api <- R6::R6Class(
   public = list(
     url = character(0),
     user = character(0),
+    db = character(0),
     relationships = data.frame(0),
     auth = character(0),
     labels = data.frame(0),
@@ -125,7 +126,7 @@ neo4j_api <- R6::R6Class(
       tibble(labels = as.character(content(res)))
     },
     get_property_keys = function() {
-      #call db.properKeys()
+      #call db.propertyKeys()
       res <- get_wrapper(self, "db/data/propertykeys")
       tibble(labels = as.character(content(res)))
     },

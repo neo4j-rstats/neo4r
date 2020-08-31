@@ -3,3 +3,4 @@
 .RData
 contabtests.R
 ..Rcheck
+.DS_Store
