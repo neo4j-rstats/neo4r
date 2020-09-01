@@ -49,7 +49,8 @@ neo4j_api <- R6::R6Class(
     labels = data.frame(0),
     print = function() {
       cat("<neo4j connection object>\n")
-      if (self$ping() == 200) {
+      res<-con$ping()
+      if (res$success == TRUE ) {
         cat("Connected at", self$url, "\n")
         cat("User:", self$user, "\n")
         cat("Neo4j version:", self$get_version(), "\n")
@@ -103,7 +104,8 @@ neo4j_api <- R6::R6Class(
     # if we should make if verbose instead of just returning SC
     ping = function() {
       # browser()
-      attempt(status_code(get_wrapper(self, "db/data/relationship/types")))
+      res<-'call db.ping()' %>% call_neo4j(self, type='row')
+      #attempt(status_code(get_wrapper(self, "db/data/relationship/types")))
     },
     # Get Neo4J version
     get_version = function() {
@@ -122,19 +124,15 @@ neo4j_api <- R6::R6Class(
     # Tibbles are awesome
     get_labels = function() {
       # call db.labels()
-      res <- get_wrapper(self, "db/data/labels")
-      tibble(labels = as.character(content(res)))
+      res<-'call db.labels()' %>% call_neo4j(self, type='row')
     },
     get_property_keys = function() {
-      #call db.propertyKeys()
-      res <- get_wrapper(self, "db/data/propertykeys")
-      tibble(labels = as.character(content(res)))
+      res<-'call db.propertyKeys()' %>% call_neo4j(self, type='row')
     },
     # Get the schema of the db
     # There must be a better way to parse this
     get_index = function() {
-      res <- get_wrapper(self, "db/data/schema/index")
-      map(content(res), as_tibble) %>% map(unnest) %>% rbindlist()
+      res<-'call db.indexes() yield id,name,state,populationPercent, uniqueness,type,entityType,labelsOrTypes,properties,provider with id,name,state,populationPercent, uniqueness,type,entityType,labelsOrTypes,properties,provider unwind labelsOrTypes as label with id,name,state,populationPercent, uniqueness, type, entityType, provider,label,properties unwind properties as property return id,name,state,populationPercent, uniqueness, type, entityType, label, property, provider' %>% call_neo4j(self, type='row')
     },
     # Get a list of constraints registered in the db
     # Same here
