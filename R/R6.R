@@ -113,12 +113,15 @@ neo4j_api <- R6::R6Class(
       res <- get_wrapper(self, "")
       content(res)$neo4j_version
     },
+    # Get Neo4J cluster status
+    #cluster_status = function() {
+      #cluster doesn't work hmmm
+     # res <- get_wrapper(self, glue('db/{self$db}/cluster/status'))
+    #},
     # Get a list of relationship registered in the db
     # return it as a data.frame because data.frame are cool
     get_relationships = function() {
-      # cypher is call db.relationshipTypes
-      res <- get_wrapper(self, "db/data/relationship/types")
-      tibble(labels = as.character(content(res)))
+      res<-'call db.relationshipTypes()' %>% call_neo4j(self, type='row')
     },
     # Get a list of labels registered in the db
     # Tibbles are awesome
@@ -137,8 +140,7 @@ neo4j_api <- R6::R6Class(
     # Get a list of constraints registered in the db
     # Same here
     get_constraints = function() {
-      res <- get_wrapper(self, "db/data/schema/constraint")
-      map(content(res), as_tibble) %>% map(unnest) %>% rbindlist()
+      res<-'call db.constraints()' %>% call_neo4j(self, type='row')
     }
   )
 )
