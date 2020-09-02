@@ -47,9 +47,10 @@ neo4j_api <- R6::R6Class(
     relationships = data.frame(0),
     auth = character(0),
     labels = data.frame(0),
+    #Print Function
     print = function() {
       cat("<neo4j connection object>\n")
-      res<-con$ping()
+      res<-self$ping()
       if (res$success == TRUE ) {
         cat("Connected at", self$url, "\n")
         cat("User:", self$user, "\n")
@@ -130,6 +131,7 @@ neo4j_api <- R6::R6Class(
       res<-'call db.labels()' %>% call_neo4j(self, type='row')
     },
     get_property_keys = function() {
+      #Make CYPHER CALL
       res<-'call db.propertyKeys()' %>% call_neo4j(self, type='row')
     },
     # Get the schema of the db
