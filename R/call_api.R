@@ -57,11 +57,15 @@ call_neo4j <- function(query, con,
   query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
   # Unfortunately I was not able to programmatically convert everything to JSON
   body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
-
+  if (con$isV4 == TRUE ) {
+    turl = glue("{con$url}/db/{con$db}/tx/commit?includeStats=true")
+  } else {
+    turl = glue("{con$url}/db/data/transaction/commit?includeStats=true")
+  }
   # Calling the API
   res <- POST(
     #must use con db here to correct endpoint
-    url = glue("{con$url}/db/{con$db}/tx/commit?includeStats=true"),
+    url = glue("{turl}"),
     add_headers(.headers = c(
       "Content-Type" = "application/json",
       "accept" = "application/json",

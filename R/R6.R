@@ -2,7 +2,7 @@
 #'
 #' @section Methods:
 #' \describe{
-#' \item{\code{access}}{list url,db, user and password}
+#' \item{\code{access}}{list url,db, user, password, and isV4}
 #' \item{\code{ping}}{test your connexion}
 #' \item{\code{version}}{Neo4J version}
 #' \item{\code{get}}{Get a list of either relationship, labels, }
@@ -13,7 +13,7 @@
 #' }
 #' @section Data:
 #' \describe{
-#' \item{\code{url}}{list url, user and password}
+#' \item{\code{url}}{list url, user, password, and isV4}
 #' \item{\code{user}}{test your connexion}
 #' }
 #'
@@ -31,7 +31,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' con <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j", password = "password")
+#' connect <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j", password = "password", isV4 = TRUE)
 #' }
 #'
 #'
@@ -47,6 +47,7 @@ neo4j_api <- R6::R6Class(
     relationships = data.frame(0),
     auth = character(0),
     labels = data.frame(0),
+    isV4 = TRUE,
     #Print Function
     print = function() {
       cat("<neo4j connection object>\n")
@@ -60,7 +61,7 @@ neo4j_api <- R6::R6Class(
         cat("(Wrong credentials or hostname)\n")
       }
     },
-    initialize = function(url, db, user, password) {
+    initialize = function(url, db, user, password, isV4) {
       # browser()
       # Clean url in case it ends with a /
       if (grepl("bolt", url)) {
@@ -78,6 +79,7 @@ neo4j_api <- R6::R6Class(
       self$db <- db
       private$password <- password
       self$auth <- base64_enc(paste0(user, ":", password))
+      self$isV4 <- isV4
     },
     reset_url = function(url) {
       self$url <- url
@@ -111,7 +113,12 @@ neo4j_api <- R6::R6Class(
     # Get Neo4J version
     get_version = function() {
       #hitting the base url should reply back with some version info
-      res <- get_wrapper(self, "")
+      if (self$isV4 == TRUE ) {
+        turl <- ""
+      } else {
+        turl <- "db/data"
+      }
+      res <- get_wrapper(self, turl)
       content(res)$neo4j_version
     },
     # Get Neo4J cluster status
