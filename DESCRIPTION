@@ -1,6 +1,6 @@
 Package: neo4r
 Title: A 'Neo4J' Driver
-Version: 4.0.0
+Version: 0.2.0
 Authors@R: 
     c(person(given = "Colin",
              family = "Fay",

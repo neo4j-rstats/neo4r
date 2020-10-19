@@ -2,7 +2,7 @@
 #'
 #' @section Methods:
 #' \describe{
-#' \item{\code{access}}{list url,db, user, password, and isV4}
+#' \item{\code{access}}{list url, user, password, db,and is_V4}
 #' \item{\code{ping}}{test your connexion}
 #' \item{\code{version}}{Neo4J version}
 #' \item{\code{get}}{Get a list of either relationship, labels, }
@@ -13,7 +13,7 @@
 #' }
 #' @section Data:
 #' \describe{
-#' \item{\code{url}}{list url, user, password, and isV4}
+#' \item{\code{url}}{list url, user, password, db and is_V4}
 #' \item{\code{user}}{test your connexion}
 #' }
 #'
@@ -21,7 +21,7 @@
 #'
 #' @importFrom attempt attempt
 #' @importFrom R6 R6Class
-#' @importFrom httr GET status_code add_headers content
+#' @importFrom httr GET status_code add_headers content http_error
 #' @importFrom purrr map as_vector
 #' @importFrom tibble as_tibble tibble
 #' @importFrom data.table rbindlist
@@ -31,7 +31,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' connect <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j", password = "password", isV4 = TRUE)
+#' connect <- neo4j_api$new(url = "http://localhost:7474"", user = "neo4j", password = "password" , db = "neo4j, is_V4 = TRUE)
 #' }
 #'
 #'
@@ -47,21 +47,33 @@ neo4j_api <- R6::R6Class(
     relationships = data.frame(0),
     auth = character(0),
     labels = data.frame(0),
-    isV4 = TRUE,
+    status_4x = 0,
+    status_3x = 0,
+    version = character(0),
+    edition = character(0),
+    transaction = character(0),
+    bolt_routing = character(0),
+    bolt_direct = character(0),
+    ping_query = 'call db.ping()',
+    exceptions_4x = list("4.0.0", "4.0.1", "4.0.2", "4.0.3"),
+    databases = tibble(0),
+    endpointUp = list(),
+    alt_ping_query = 'with true as success return success',
+    is_V4 = TRUE,
     #Print Function
     print = function() {
       cat("<neo4j connection object>\n")
-      res<-self$ping()
-      if (res$success == TRUE ) {
+      #res<-self$ping()
+      if (self$ping()$result == TRUE ) {
         cat("Connected at", self$url, "\n")
         cat("User:", self$user, "\n")
-        cat("Neo4j version:", self$get_version(), "\n")
+        cat("Neo4j version:", self$version, "\n")
       } else {
         cat("No registered Connection\n")
         cat("(Wrong credentials or hostname)\n")
       }
     },
-    initialize = function(url, db, user, password, isV4) {
+    initialize = function(url,  user, password,db="neo4j", is_V4 = TRUE) {
       # browser()
       # Clean url in case it ends with a /
       if (grepl("bolt", url)) {
@@ -79,7 +91,11 @@ neo4j_api <- R6::R6Class(
       self$db <- db
       private$password <- password
       self$auth <- base64_enc(paste0(user, ":", password))
-      self$isV4 <- isV4
+      self$endpointUp <-self$endpoint_up()
+      if (self$endpointUp$status == TRUE) {
+        #if url is not reachable - nothing else is going to work
+        self$get_info()
+        }
     },
     reset_url = function(url) {
       self$url <- url
@@ -106,20 +122,99 @@ neo4j_api <- R6::R6Class(
     # This only return the status code for now so I wonder
     # if we should make if verbose instead of just returning SC
     ping = function() {
-      # browser()
-      res<-'call db.ping()' %>% call_neo4j(self, type='row')
-      #attempt(status_code(get_wrapper(self, "db/data/relationship/types")))
+      browser()
+      self$endpointUp<-self$endpoint_up()
+      if (self$endpointUp$status == TRUE) {
+      res<-self$ping_query %>% call_neo4j(self, type='row')
+      return(res$success)
+      }
+      return(self$endpointUp$status)
+    },
+    endpoint_up = function(){
+      #browser()
+      result = tryCatch({
+        aResult <- http_error(self$url)
+        if (aResult == FALSE){
+          alist <- list(status=TRUE, msg=paste("Server Up:",self$url ) )
+        } else {alist <- list(status=FALSE, msg=paste("Server Down:",self$url))}
+        return(alist)
+        },
+        error = function(e) {
+          alist <- list( status=FALSE, msg=paste("Server Down:",self$url), error=e)
+          return (alist)
+        })
     },
     # Get Neo4J version
-    get_version = function() {
+    get_versionx = function() {
       #hitting the base url should reply back with some version info
-      if (self$isV4 == TRUE ) {
+      if (self$is_V4 == TRUE ) {
         turl <- ""
       } else {
         turl <- "db/data"
       }
       res <- get_wrapper(self, turl)
       content(res)$neo4j_version
+    },
+    get_version = function() {
+      #hitting the base url should reply back with some version info
+      #browser()
+      if (self$endpoint_up()$status == TRUE ) {
+
+        res4x <- get_wrapper(self, "")
+        self$status_4x <- status_code(res4x)
+
+        res3x <- get_wrapper(self,"db/data")
+        self$status_3x <- status_code(res3x)
+
+        if ((self$status_4x == 200) && (self$status_3x != 200)) {
+          self$version <- content(res4x)$neo4j_version
+          if (grepl('4[.][0-999][.][0-999].*',self$version)   ){
+            self$is_V4 <- TRUE
+            print('Found Neo4j 4.x')}
+          if (self$version %in% self$exceptions_4x)
+          {self$ping_query <- alt_ping_query}
+          self$edition <- content(res4x)$neo4j_edition
+          return(TRUE)
+        }
+        else { #probably neo4j 3.x
+          if (self$status_3x == 200){
+            self$version = content(res3x)$neo4j_version
+            if  (grepl('3[.][0-999][.][0-999].*',self$version)  )  {
+              self$is_V4 = FALSE
+              self$ping_query <- alt_ping_query
+              self$edition <- content(res4x)$neo4j_edition
+              print('Found Neo4j 3.x')
+              return(TRUE)
+            }
+            else {
+              self$is_V4 = FALSE
+              self$ping_query <- alt_ping_query
+              print(glue('Found Neo4j ',self$version))
+              return(TRUE)
+            }
+          }
+          else {
+            self$is_V4 = FALSE
+            self$ping_query <- alt_ping_query
+            print(glue('Found:',self$version))
+            return(FALSE)
+          }
+        }
+      }
+      return(FALSE)
+    },
+    get_info = function() {
+      #hitting the base url should reply back with some version info
+      #browser()
+      if (self$get_version()){
+        if (self$is_V4){
+          savedb <- self$db
+          self$db <- "system" # switch to system to get list of database and status
+          self$databases <- 'show databases' %>% call_neo4j(self,type="row")
+          self$db <- savedb
+          #TODO - make some sense of the database tibble
+        }
+      }
     },
     # Get Neo4J cluster status
     #cluster_status = function() {
@@ -157,7 +252,8 @@ neo4j_api <- R6::R6Class(
 # "If you need to copy and paste something more than twice, write a function"
 
 get_wrapper <- function(self, url) {
-  # browser()
+  #browser()
+  #result = tryCatch({
   GET(
     glue("{self$url}/{url}"),
     add_headers(.headers = c(
@@ -166,4 +262,14 @@ get_wrapper <- function(self, url) {
       "Authorization" = paste0("Basic ", self$auth)
     ))
   )
+  #)},
+  #warning = function(w) {
+  #  print(paste('Warning: ',w))
+  #},
+  #error = function(e) {
+  #  print(paste('Error - Assume Connection Failed:',e))
+  #  alist <- list( url= glue("{self$url}/{url}"), status_code = -1, error =  paste('Error - Assume Connection Failed:',e))
+  #  return (alist)
+  #})
+  #return(result)
 }

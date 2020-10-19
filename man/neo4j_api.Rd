@@ -14,7 +14,7 @@ A Neo4J Connexion
 \section{Methods}{
 
 \describe{
-\item{\code{access}}{list url,db, user and password}
+\item{\code{access}}{list url, user, password, db,and is_V4}
 \item{\code{ping}}{test your connexion}
 \item{\code{version}}{Neo4J version}
 \item{\code{get}}{Get a list of either relationship, labels, }
@@ -28,14 +28,14 @@ A Neo4J Connexion
 \section{Data}{
 
 \describe{
-\item{\code{url}}{list url, user and password}
+\item{\code{url}}{list url, user, password, db and is_V4}
 \item{\code{user}}{test your connexion}
 }
 }
 
 \examples{
 \dontrun{
-con <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j", password = "password")
+connect <- neo4j_api$new(url = "http://localhost:7474"", user = "neo4j", password = "password" , db = "neo4j, is_V4 = TRUE)
 }
 
 
@@ -51,6 +51,7 @@ con <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j"
 \item \href{#method-access}{\code{neo4j_api$access()}}
 \item \href{#method-ping}{\code{neo4j_api$ping()}}
 \item \href{#method-get_version}{\code{neo4j_api$get_version()}}
+\item \href{#method-get_info}{\code{neo4j_api$get_info()}}
 \item \href{#method-get_relationships}{\code{neo4j_api$get_relationships()}}
 \item \href{#method-get_labels}{\code{neo4j_api$get_labels()}}
 \item \href{#method-get_property_keys}{\code{neo4j_api$get_property_keys()}}
@@ -73,7 +74,7 @@ con <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j"
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{neo4j_api$new(url, db, user, password)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{neo4j_api$new(url, user, password, db = "neo4j", is_V4 = TRUE)}\if{html}{\out{</div>}}
 }
 
 }
@@ -128,6 +129,15 @@ con <- neo4j_api$new(url = "http://localhost:7474", db = "neo4j", user = "neo4j"
 \subsection{Method \code{get_version()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{neo4j_api$get_version()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_info"></a>}}
+\if{latex}{\out{\hypertarget{method-get_info}{}}}
+\subsection{Method \code{get_info()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{neo4j_api$get_info()}\if{html}{\out{</div>}}
 }
 
 }
