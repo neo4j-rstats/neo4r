@@ -64,10 +64,11 @@ neo4j_api <- R6::R6Class(
     print = function() {
       cat("<neo4j connection object>\n")
       #res<-self$ping()
-      if (self$ping()$result == TRUE ) {
+      if (self$ping() == TRUE ) {
         cat("Connected at", self$url, "\n")
         cat("User:", self$user, "\n")
         cat("Neo4j version:", self$version, "\n")
+        cat("Neo4j eddition:", self$edition, "\n")
       } else {
         cat("No registered Connection\n")
         cat("(Wrong credentials or hostname)\n")
@@ -122,11 +123,11 @@ neo4j_api <- R6::R6Class(
     # This only return the status code for now so I wonder
     # if we should make if verbose instead of just returning SC
     ping = function() {
-      browser()
+      #browser()
       self$endpointUp<-self$endpoint_up()
       if (self$endpointUp$status == TRUE) {
       res<-self$ping_query %>% call_neo4j(self, type='row')
-      return(res$success)
+      return(res$success$value)
       }
       return(self$endpointUp$status)
     },
@@ -145,16 +146,6 @@ neo4j_api <- R6::R6Class(
         })
     },
     # Get Neo4J version
-    get_versionx = function() {
-      #hitting the base url should reply back with some version info
-      if (self$is_V4 == TRUE ) {
-        turl <- ""
-      } else {
-        turl <- "db/data"
-      }
-      res <- get_wrapper(self, turl)
-      content(res)$neo4j_version
-    },
     get_version = function() {
       #hitting the base url should reply back with some version info
       #browser()
