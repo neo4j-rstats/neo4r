@@ -35,7 +35,7 @@ to_json_neo <- function(query, include_stats, meta, type) {
 #' @return the result from the Neo4J Call
 #' @export
 
-call_neo4j <- function(query, con,
+call_neo4j <- function(query, con, params = list(), db = "neo4j",
                        type = c("row", "graph"),
                        output = c("r", "json"),
                        include_stats = FALSE,
@@ -53,22 +53,57 @@ call_neo4j <- function(query, con,
   # Clean the query to prevent weird mess up with " and stuffs
   query_clean <- clean_query(query)
 
-  # Transform the query to a Neo4J JSON format
-  query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
-  # Unfortunately I was not able to programmatically convert everything to JSON
-  body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
+  # POST body
+  if (con$major_version < 4) { # for Neo4j versions before 4.x
+    # Transform the query to a Neo4J JSON format
+    query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
+    # Unfortunately I was not able to programmatically convert everything to JSON
+    body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
 
-  # Calling the API
-  res <- POST(
-    url = glue("{con$url}/db/data/transaction/commit?includeStats=true"),
-    add_headers(.headers = c(
-      "Content-Type" = "application/json",
-      "accept" = "application/json",
-      # "X-Stream" = "true",
-      "Authorization" = paste0("Basic ", con$auth)
-    )),
-    body = body
-  )
+    # Calling the API
+    res <- POST(
+      url = glue("{con$url}/db/data/transaction/commit?includeStats=true"),
+      add_headers(.headers = c(
+        "Content-Type" = "application/json",
+        "accept" = "application/json",
+        # "X-Stream" = "true",
+        "Authorization" = paste0("Basic ", con$auth)
+      )),
+      body = body
+    )
+
+  } else { # for Neo4j 4.x
+    # if parameters are empty then they need to be a vector
+    # in order for the json POST body to be formatted correctly
+    if (length(params) == 0) params <- c()
+
+    body <- list(
+      statements = list(
+        list(
+          statement = query_clean,
+          parameters = params, # this is new in 4.x
+          resultDataContents = list(type)
+        )
+      )
+    )
+
+    # add include_stats and meta based on user preferences
+    if (include_stats) body$statements[[1]]$includeStats = include_stats
+    if (include_meta) body$statements[[1]]$meta = include_meta
+
+    # Calling the API
+    res <- POST(
+      url = glue("{con$url}/db/{db}/tx/commit"),
+      add_headers(.headers = c(
+        "Content-Type" = "application/json",
+        "accept" = "application/json",
+        # "X-Stream" = "true",
+        "Authorization" = paste0("Basic ", con$auth)
+      )),
+      body = body,
+      encode = "json"
+    )
+  }
 
   # Verify the status code is 200
   stop_if_not(status_code(res), ~.x == 200, "API error")
