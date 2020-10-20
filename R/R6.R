@@ -46,18 +46,20 @@ neo4j_api <- R6::R6Class(
     relationships = data.frame(0),
     auth = character(0),
     labels = data.frame(0),
+    db = character(0),
     print = function() {
       cat("<neo4j connection object>\n")
       if (self$ping() == 200) {
         cat("Connected at", self$url, "\n")
         cat("User:", self$user, "\n")
+        cat("Neo4j database:", self$db, "\n")
         cat("Neo4j version:", self$get_version(), "\n")
       } else {
         cat("No registered Connection\n")
         cat("(Wrong credentials or hostname)\n")
       }
     },
-    initialize = function(url, user, password) {
+    initialize = function(url, user, password, db = "neo4j") {
       # browser()
       # Clean url in case it ends with a /
       if (grepl("bolt", url)) {
@@ -74,6 +76,7 @@ neo4j_api <- R6::R6Class(
       self$user <- user
       private$password <- password
       self$auth <- base64_enc(paste0(user, ":", password))
+      self$db <- db
     },
     reset_url = function(url) {
       self$url <- url
@@ -85,6 +88,9 @@ neo4j_api <- R6::R6Class(
     reset_password = function(password) {
       private$password <- password
       self$auth <- base64_enc(paste0(self$user, ":", private$password))
+    },
+    reset_db = function(db) {
+      self$db <- db
     },
     # List elements
     access = function() {

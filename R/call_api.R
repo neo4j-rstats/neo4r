@@ -35,7 +35,7 @@ to_json_neo <- function(query, include_stats, meta, type) {
 #' @return the result from the Neo4J Call
 #' @export
 
-call_neo4j <- function(query, con, params = list(), db = "neo4j",
+call_neo4j <- function(query, con, params = list(),
                        type = c("row", "graph"),
                        output = c("r", "json"),
                        include_stats = FALSE,
@@ -93,7 +93,7 @@ call_neo4j <- function(query, con, params = list(), db = "neo4j",
 
     # Calling the API
     res <- POST(
-      url = glue("{con$url}/db/{db}/tx/commit"),
+      url = glue("{con$url}/db/{con$db}/tx/commit"),
       add_headers(.headers = c(
         "Content-Type" = "application/json",
         "accept" = "application/json",
