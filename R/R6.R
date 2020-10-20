@@ -194,7 +194,7 @@ neo4j_api <- R6::R6Class(
     # save converting this later from the get_version() string
     major_version = function() {
       self$get_version() %>%
-        str_sub(1,1) %>%
+        substr(1,1) %>%
         as.integer()
     }
   )
