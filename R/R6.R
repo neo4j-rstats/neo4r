@@ -22,7 +22,7 @@
 #' @importFrom attempt attempt
 #' @importFrom R6 R6Class
 #' @importFrom httr GET status_code add_headers content
-#' @importFrom purrr map as_vector
+#' @importFrom purrr map map_dfr as_vector
 #' @importFrom tibble as_tibble tibble
 #' @importFrom data.table rbindlist
 #' @importFrom tidyr unnest
