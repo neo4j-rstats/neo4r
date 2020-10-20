@@ -168,7 +168,7 @@ neo4j_api <- R6::R6Class(
                     "UNWIND labelsOrTypes as label ",
                     "UNWIND properties as property ",
                     "RETURN id, name, state, populationPercent, uniqueness, type, entityType, label, property, provider") %>%
-          call_neo4j(con4) %>%
+          call_neo4j(self) %>%
           map(unlist) %>%
           as_tibble()
       }
