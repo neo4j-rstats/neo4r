@@ -4,7 +4,7 @@
 \name{neo4j_api}
 \alias{neo4j_api}
 \title{A Neo4J Connexion}
-\format{An object of class \code{R6ClassGenerator} of length 24.}
+\format{An object of class \code{R6ClassGenerator} of length 25.}
 \usage{
 neo4j_api
 }
