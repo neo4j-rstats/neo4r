@@ -127,6 +127,7 @@ neo4j_api <- R6::R6Class(
       self$endpointUp<-self$endpoint_up()
       if (self$endpointUp$status == TRUE) {
       res<-self$ping_query %>% call_neo4j(self, type='row')
+      if (length(res$error_code)>0) return(FALSE)
       return(res$success$value)
       }
       return(self$endpointUp$status)
@@ -163,7 +164,7 @@ neo4j_api <- R6::R6Class(
             self$is_V4 <- TRUE
             print('Found Neo4j 4.x')}
           if (self$version %in% self$exceptions_4x)
-          {self$ping_query <- alt_ping_query}
+          {self$ping_query <- self$alt_ping_query}
           self$edition <- content(res4x)$neo4j_edition
           return(TRUE)
         }
@@ -172,21 +173,21 @@ neo4j_api <- R6::R6Class(
             self$version = content(res3x)$neo4j_version
             if  (grepl('3[.][0-999][.][0-999].*',self$version)  )  {
               self$is_V4 = FALSE
-              self$ping_query <- alt_ping_query
+              self$ping_query <- self$alt_ping_query
               self$edition <- content(res4x)$neo4j_edition
               print('Found Neo4j 3.x')
               return(TRUE)
             }
             else {
               self$is_V4 = FALSE
-              self$ping_query <- alt_ping_query
+              self$ping_query <- self$alt_ping_query
               print(glue('Found Neo4j ',self$version))
               return(TRUE)
             }
           }
           else {
             self$is_V4 = FALSE
-            self$ping_query <- alt_ping_query
+            self$ping_query <- self$alt_ping_query
             print(glue('Found:',self$version))
             return(FALSE)
           }
