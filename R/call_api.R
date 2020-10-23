@@ -9,6 +9,7 @@ clean_query <- function(query) {
 #'
 #' @param query The cypher query
 #' @param con A NEO4JAPI connection object
+#' @param params A list of parameters to pass along with the cypher query
 #' @param type Return the result as row or as graph
 #' @param output Use "json" if you want the output to be printed as JSON
 #' @param include_stats tShould the stats about the transaction be included?
@@ -94,6 +95,19 @@ call_neo4j <- function(query, con, params = list(),
       meta = include_meta
     )
   }
+}
+
+#' Run A Cypher Query (but start with the connection object)
+#'
+#' @param con A NEO4JAPI connection object
+#' @param query The cypher query
+#' @param params A list of parameters to pass along with the cypher query
+#' @param ... arguments to pass along to the call_neo4j function
+#'
+#' @return the result from the Neo4j Call
+#' @export
+neo4r_cypher <- function(con, query, params, ...) {
+  call_neo4j(query, con, params, ...)
 }
 
 # con <- neo4j_api$new(url = "http://localhost:7474/", user = "neo4j", password = "pouetpouet")
