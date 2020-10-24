@@ -5,24 +5,11 @@ clean_query <- function(query) {
   res
 }
 
-#' @importFrom jsonlite toJSON
-
-to_json_neo <- function(query, include_stats, meta, type) {
-  toJSON(
-    list(
-      statement = query,
-      includeStats = include_stats,
-      meta = meta,
-      resultDataContents = list(type)
-    ),
-    auto_unbox = TRUE
-  )
-}
-
 #' Call Neo4J API
 #'
 #' @param query The cypher query
 #' @param con A NEO4JAPI connection object
+#' @param params A list of parameters to pass along with the cypher query
 #' @param type Return the result as row or as graph
 #' @param output Use "json" if you want the output to be printed as JSON
 #' @param include_stats tShould the stats about the transaction be included?
@@ -35,7 +22,7 @@ to_json_neo <- function(query, include_stats, meta, type) {
 #' @return the result from the Neo4J Call
 #' @export
 
-call_neo4j <- function(query, con,
+call_neo4j <- function(query, con, params = list(),
                        type = c("row", "graph"),
                        output = c("r", "json"),
                        include_stats = FALSE,
@@ -53,21 +40,44 @@ call_neo4j <- function(query, con,
   # Clean the query to prevent weird mess up with " and stuffs
   query_clean <- clean_query(query)
 
-  # Transform the query to a Neo4J JSON format
-  query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
-  # Unfortunately I was not able to programmatically convert everything to JSON
-  body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
+  # if parameters are empty then they need to be a vector
+  # in order for the json POST body to be formatted correctly
+  if (length(params) == 0) params <- c()
+
+  post_body <- list(
+    statements = list(
+      list(
+        statement = query_clean,
+        parameters = params,
+        resultDataContents = list(type)
+      )
+    )
+  )
+
+  # add include_stats and meta based on user preferences
+  if (include_stats) body$statements[[1]]$includeStats = include_stats
+  if (include_meta) body$statements[[1]]$meta = include_meta
+
+  # POST URL (different for pre-4.x vs. 4.x)
+  if (con$major_version < 4) {
+    # for Neo4j versions before 4.x
+    post_url <- glue("{con$url}/db/data/transaction/commit")
+  } else {
+    # for Neo4j version 4.x
+    post_url <- glue("{con$url}/db/{con$db}/tx/commit")
+  }
 
   # Calling the API
   res <- POST(
-    url = glue("{con$url}/db/data/transaction/commit?includeStats=true"),
+    url = post_url,
     add_headers(.headers = c(
       "Content-Type" = "application/json",
       "accept" = "application/json",
       # "X-Stream" = "true",
       "Authorization" = paste0("Basic ", con$auth)
     )),
-    body = body
+    body = post_body,
+    encode = "json"
   )
 
   # Verify the status code is 200
@@ -85,6 +95,19 @@ call_neo4j <- function(query, con,
       meta = include_meta
     )
   }
+}
+
+#' Run A Cypher Query (but start with the connection object)
+#'
+#' @param con A NEO4JAPI connection object
+#' @param query The cypher query
+#' @param params A list of parameters to pass along with the cypher query
+#' @param ... arguments to pass along to the call_neo4j function
+#'
+#' @return the result from the Neo4j Call
+#' @export
+neo4r_cypher <- function(con, query, params, ...) {
+  call_neo4j(query, con, params, ...)
 }
 
 # con <- neo4j_api$new(url = "http://localhost:7474/", user = "neo4j", password = "pouetpouet")

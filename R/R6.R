@@ -22,7 +22,7 @@
 #' @importFrom attempt attempt
 #' @importFrom R6 R6Class
 #' @importFrom httr GET status_code add_headers content
-#' @importFrom purrr map as_vector
+#' @importFrom purrr map map_dfr as_vector
 #' @importFrom tibble as_tibble tibble
 #' @importFrom data.table rbindlist
 #' @importFrom tidyr unnest
@@ -46,18 +46,20 @@ neo4j_api <- R6::R6Class(
     relationships = data.frame(0),
     auth = character(0),
     labels = data.frame(0),
+    db = character(0),
     print = function() {
       cat("<neo4j connection object>\n")
       if (self$ping() == 200) {
         cat("Connected at", self$url, "\n")
         cat("User:", self$user, "\n")
+        cat("Neo4j database:", self$db, "\n")
         cat("Neo4j version:", self$get_version(), "\n")
       } else {
         cat("No registered Connection\n")
         cat("(Wrong credentials or hostname)\n")
       }
     },
-    initialize = function(url, user, password) {
+    initialize = function(url, user, password, db = "neo4j") {
       # browser()
       # Clean url in case it ends with a /
       if (grepl("bolt", url)) {
@@ -74,6 +76,7 @@ neo4j_api <- R6::R6Class(
       self$user <- user
       private$password <- password
       self$auth <- base64_enc(paste0(user, ":", password))
+      self$db <- db
     },
     reset_url = function(url) {
       self$url <- url
@@ -85,6 +88,9 @@ neo4j_api <- R6::R6Class(
     reset_password = function(password) {
       private$password <- password
       self$auth <- base64_enc(paste0(self$user, ":", private$password))
+    },
+    reset_db = function(db) {
+      self$db <- db
     },
     # List elements
     access = function() {
@@ -98,40 +104,104 @@ neo4j_api <- R6::R6Class(
     # if we should make if verbose instead of just returning SC
     ping = function() {
       # browser()
-      attempt(status_code(get_wrapper(self, "db/data/relationship/types")))
+      attempt(status_code(GET(self$url)))
     },
     # Get Neo4J version
     get_version = function() {
-      res <- get_wrapper(self, "db/data")
-      content(res)$neo4j_version
+      # get the root endpoint for the connection
+      res <- GET(self$url)
+      root <- content(res)
+
+      # determine if root endpoint content indicates v3.x or v4.x of Neo4j
+      # there may be better ways to discover the version, but this works for now
+      if ("neo4j_version" %in% names(root)) {
+        version <- root$neo4j_version # this is version 4.x
+      }
+      else {
+        res <- get_wrapper(self, "db/data")
+        version <- content(res)$neo4j_version # this is version 3.x
+      }
+      version
     },
     # Get a list of relationship registered in the db
     # return it as a data.frame because data.frame are cool
     get_relationships = function() {
-      res <- get_wrapper(self, "db/data/relationship/types")
-      tibble(labels = as.character(content(res)))
+      if (self$major_version < 4) {
+        res <- get_wrapper(self, "db/data/relationship/types")
+        typs <- tibble(labels = as.character(content(res)))
+      } else {
+        typs <- 'CALL db.relationshipTypes' %>%
+          call_neo4j(self) %>%
+          map(unlist) %>%
+          as_tibble()
+      }
+      typs
     },
     # Get a list of labels registered in the db
     # Tibbles are awesome
     get_labels = function() {
-      res <- get_wrapper(self, "db/data/labels")
-      tibble(labels = as.character(content(res)))
+      if (self$major_version < 4) {
+        res <- get_wrapper(self, "db/data/labels")
+        labs <- tibble(labels = as.character(content(res)))
+      } else {
+        labs <- 'CALL db.labels' %>%
+          call_neo4j(self) %>%
+          map(unlist) %>%
+          as_tibble()
+      }
+      labs
     },
     get_property_keys = function() {
-      res <- get_wrapper(self, "db/data/propertykeys")
-      tibble(labels = as.character(content(res)))
+      if (self$major_version < 4) {
+        res <- get_wrapper(self, "db/data/propertykeys")
+        props <- tibble(labels = as.character(content(res)))
+      } else {
+        props <- 'CALL db.propertyKeys' %>%
+          call_neo4j(self) %>%
+          map(unlist) %>%
+          as_tibble()
+      }
+      props
     },
     # Get the schema of the db
     # There must be a better way to parse this
     get_index = function() {
-      res <- get_wrapper(self, "db/data/schema/index")
-      map(content(res), as_tibble) %>% map(unnest) %>% rbindlist()
+      if (self$major_version < 4) {
+        res <- get_wrapper(self, "db/data/schema/index")
+        idx <- map_dfr(content(res), as_tibble) %>% unnest(c(property_keys, labels))
+      } else {
+        idx <- glue("CALL db.indexes() yield id, name, state, populationPercent, uniqueness, type, entityType, labelsOrTypes, properties, provider ",
+                    "UNWIND labelsOrTypes as label ",
+                    "UNWIND properties as property ",
+                    "RETURN id, name, state, populationPercent, uniqueness, type, entityType, label, property, provider") %>%
+          call_neo4j(self) %>%
+          map(unlist) %>%
+          as_tibble()
+      }
+      idx
     },
     # Get a list of constraints registered in the db
     # Same here
     get_constraints = function() {
-      res <- get_wrapper(self, "db/data/schema/constraint")
-      map(content(res), as_tibble) %>% map(unnest) %>% rbindlist()
+      if (self$major_version < 4) {
+        res <- get_wrapper(self, "db/data/schema/constraint")
+        cons <- map_dfr(content(res), as_tibble) %>% unnest(c(property_keys, type))
+      } else {
+        cons <- "CALL db.constraints" %>%
+          call_neo4j(self) %>%
+          map(unlist) %>%
+          as_tibble()
+      }
+      cons
+    }
+  ),
+  active = list(
+    # get the major version of Neo4j as a number
+    # save converting this later from the get_version() string
+    major_version = function() {
+      self$get_version() %>%
+        substr(1,1) %>%
+        as.integer()
     }
   )
 )
