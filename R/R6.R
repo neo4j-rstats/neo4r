@@ -49,6 +49,7 @@ neo4j_api <- R6::R6Class(
     labels = data.frame(0),
     status_4x = 0,
     status_3x = 0,
+    last_error = list(),
     version = character(0),
     edition = character(0),
     transaction = character(0),
@@ -231,7 +232,25 @@ neo4j_api <- R6::R6Class(
     # Get the schema of the db
     # There must be a better way to parse this
     get_index = function() {
-      res<-'call db.indexes() yield id,name,state,populationPercent, uniqueness,type,entityType,labelsOrTypes,properties,provider with id,name,state,populationPercent, uniqueness,type,entityType,labelsOrTypes,properties,provider unwind labelsOrTypes as label with id,name,state,populationPercent, uniqueness, type, entityType, provider,label,properties unwind properties as property return id,name,state,populationPercent, uniqueness, type, entityType, label, property, provider' %>% call_neo4j(self, type='row')
+      if (self$is_V4) {
+        query <- glue('call db.indexes() ',
+              'yield id,name,state,populationPercent, uniqueness,type,entityType,labelsOrTypes,properties,provider ',
+              ' unwind labelsOrTypes as label ',
+              'with id,name,state,populationPercent, uniqueness, type, entityType, provider,label,properties ',
+              'unwind properties as property ',
+              'return id,name,state,populationPercent, uniqueness, type, entityType, label, property, provider'
+              )
+      } else {
+        query <- glue(
+          'call db.indexes() ',
+          'yield description,indexName,tokenNames,properties,state,type,progress,provider,id,failureMessage ',
+          'unwind tokenNames as tokenName ',
+          'with description,indexName,tokenName,properties,state,type,progress,provider,id,failureMessage ',
+          'unwind properties as property ',
+          'return description,indexName,tokenName,property,state,type,progress,provider,id,failureMessage ',
+          )
+      }
+      res<-query %>% call_neo4j(self, type='row')
     },
     # Get a list of constraints registered in the db
     # Same here

@@ -77,6 +77,9 @@ call_neo4j <- function(query, con,
   )
 
   # Verify the status code is 200
+  if (status_code(res)!=200){
+    con$last_error <- list( status=FALSE, result=res)
+  }
   stop_if_not(status_code(res), ~.x == 200, "Neo4j API error")
   # return(res)
 
