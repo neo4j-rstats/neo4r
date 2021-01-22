@@ -4,8 +4,14 @@
 \alias{call_neo4j}
 \title{Call Neo4J API}
 \usage{
-call_neo4j(query, con, type = c("row", "graph"), output = c("r",
-  "json"), include_stats = FALSE, include_meta = FALSE)
+call_neo4j(
+  query,
+  con,
+  type = c("row", "graph"),
+  output = c("r", "json", "raw"),
+  include_stats = FALSE,
+  include_meta = FALSE
+)
 }
 \arguments{
 \item{query}{The cypher query}
@@ -14,7 +20,7 @@ call_neo4j(query, con, type = c("row", "graph"), output = c("r",
 
 \item{type}{Return the result as row or as graph}
 
-\item{output}{Use "json" if you want the output to be printed as JSON}
+\item{output}{Use "json" if you want the output to be printed as JSON, "raw" if you want output as a raw object}
 
 \item{include_stats}{tShould the stats about the transaction be included?}
 

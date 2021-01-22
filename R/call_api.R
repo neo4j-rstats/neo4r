@@ -24,7 +24,7 @@ to_json_neo <- function(query, include_stats, meta, type) {
 #' @param query The cypher query
 #' @param con A NEO4JAPI connection object
 #' @param type Return the result as row or as graph
-#' @param output Use "json" if you want the output to be printed as JSON
+#' @param output Use "json" if you want the output to be printed as JSON, "raw" if you want output as a raw object
 #' @param include_stats tShould the stats about the transaction be included?
 #' @param include_meta tShould the stats about the transaction be included?
 #'
@@ -37,7 +37,7 @@ to_json_neo <- function(query, include_stats, meta, type) {
 
 call_neo4j <- function(query, con,
                        type = c("row", "graph"),
-                       output = c("r", "json"),
+                       output = c("r", "json", "raw"),
                        include_stats = FALSE,
                        include_meta = FALSE) {
   # browser()
@@ -77,6 +77,8 @@ call_neo4j <- function(query, con,
   # Return the parsed output, to json or to R
   if (output == "json") {
     toJSON(lapply(content(res)$results, function(x) x$data), pretty = TRUE)
+  } else if (output == "raw") {
+    content(res)$results
   } else {
     parse_api_results(
       res = res,
