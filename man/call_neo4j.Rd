@@ -4,8 +4,14 @@
 \alias{call_neo4j}
 \title{Call Neo4J API}
 \usage{
-call_neo4j(query, con, type = c("row", "graph"), output = c("r",
-  "json"), include_stats = FALSE, include_meta = FALSE)
+call_neo4j(
+  query,
+  con,
+  type = c("row", "graph"),
+  output = c("r", "json"),
+  include_stats = FALSE,
+  include_meta = FALSE
+)
 }
 \arguments{
 \item{query}{The cypher query}
