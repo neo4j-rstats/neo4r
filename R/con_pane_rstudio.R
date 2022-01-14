@@ -55,26 +55,19 @@ tibble_res <- function(label, type) {
 
 #' @importFrom tibble tibble
 
-list_columns <- function(table, url, auth) {
+list_columns <- function(table, con) {
   if (table == "Node Labels") {
-    res <- get_wrapper_for_connect(url, "db/data/labels", auth)
-    res <- tibble(labels = as.character(content(res)))
-    if (nrow(res) != 0) {
-      res <- tibble_res(res$labels, "node label")
-    }
+    res <- con$get_labels()
+      res <- tibble(name=res$label, type="node label")
   } else if (table == "Relationship Types") {
-    res <- get_wrapper_for_connect(url, "db/data/relationship/types", auth)
-    res <- tibble(labels = as.character(content(res)))
-    if (nrow(res) != 0) {
+    res <- con$get_relationships()
       res <- tibble(
-        name = res$labels,
-        type = rep_len("relationship type", length(res)),
+        name = res$relationshipType,
+        type = "relationship type",
         stringsAsFactors = FALSE
       )
-    }
   } else if (table == "Constraints") {
-    res <- get_wrapper_for_connect(url, "db/data/schema/constraints", auth)
-    res <- tibble(labels = as.character(content(res)))
+    res <- con$get_constraints()
     if (nrow(res) != 0) {
       res <- data.frame(
         name = res$labels,
@@ -83,8 +76,7 @@ list_columns <- function(table, url, auth) {
       )
     }
   } else if (table == "Property Keys") {
-    res <- get_wrapper_for_connect(url, "db/data/propertykeys", auth)
-    res <- tibble(labels = as.character(content(res)))
+    res <- con$get_property_keys()
     if (nrow(res) != 0) {
       res <- data.frame(
         name = res$labels,
@@ -99,19 +91,15 @@ list_columns <- function(table, url, auth) {
 #' @importFrom tibble tibble
 #' @importFrom utils head
 #' @importFrom httr content
-preview_object <- function(table, limit, url, auth) {
+preview_object <- function(table, con) {
   if (table == "nodes") {
-    res <- get_wrapper_for_connect(url, "db/data/labels", auth)
-    res <- tibble(labels = as.character(content(res)))
+    res <- con$get_labels()
   } else if (table == "relationship") {
-    res <- get_wrapper_for_connect(url, "db/data/relationship/types", auth)
-    res <- tibble(labels = as.character(content(res)))
+    res <- con$get_relationships()
   } else if (table == "constraints") {
-    res <- get_wrapper_for_connect(url, "db/data/schema/constraints", auth)
-    res <- tibble(labels = as.character(content(res)))
+    res <-  con$get_constraints()
   } else if (table == "property keys") {
-    res <- get_wrapper_for_connect(url, "db/data/propertykeys", auth)
-    res <- tibble(labels = as.character(content(res)))
+    res <- con$get_property_keys()
   }
   head(res, limit)
 }
@@ -154,7 +142,7 @@ list_objects_types <- function() {
 #' @keywords internal
 #' @export
 
-on_connection_opened <- function(con, url, auth) {
+on_connection_opened <- function(con, url, auth, db) {
   # browser()
   observer <- getOption("connectionObserver")
   if (!is.null(observer)) {
@@ -163,7 +151,7 @@ on_connection_opened <- function(con, url, auth) {
       host = "neo4jhost",
       displayName = "Neo4J server",
       icon = system.file("icons", "neologo.png", package = "neo4r"),
-      connectCode = '# Connect to Neo4J \nlibrary(neo4r)\ncon <- neo4j_api$new(url = "http://localhost:7474/", user = "neo4j", password = "neo4j")\nlaunch_con_pane(con)',
+      connectCode = '# Connect to Neo4J \nlibrary(neo4r)\ncon <- neo4j_api$new(url = "http://localhost:7474/", user = "neo4j", db="neo4j",  password = "neo4j")\nlaunch_con_pane(con)',
       disconnect = function() {
         close_connection()
       },
@@ -174,7 +162,7 @@ on_connection_opened <- function(con, url, auth) {
         list_objects(includeType = TRUE)
       },
       listColumns = function(table) {
-        list_columns(table, url = con$url, auth = con$auth)
+        list_columns(table, con)
       },
       previewObject = function(rowLimit, table) {
         preview_object(table, rowLimit, url = con$url, auth = con$auth)
@@ -208,6 +196,11 @@ ui <- function() {
       textInput(
         "password",
         "Password:"
+      ),
+      textInput(
+        "database",
+        "Database:",
+        value="neo4j"
       )
     )
   )
@@ -215,11 +208,11 @@ ui <- function() {
 
 #' @importFrom glue glue
 
-build_code <- function(url, user, password) {
+build_code <- function(url, user, password,database) {
   paste(
     "# Connect to Neo4J\n",
     "library(neo4r)\n",
-    glue("con <- neo4j_api$new(url = '{url}', user = '{user}', password = '{password}')"),
+    glue("con <- neo4j_api$new(url = '{url}', user = '{user}', db = '{database}', password = '{password}')"),
     "\ncon$ping()",
     "\nlaunch_con_pane(con)"
   )
@@ -229,7 +222,7 @@ build_code <- function(url, user, password) {
 
 server <- function(input, output, session) {
   observe({
-    update_dialog(build_code(input$url, input$user, input$password))
+    update_dialog(build_code(input$url, input$user, input$password, input$database))
   })
 }
 
@@ -256,7 +249,7 @@ run_app <- function() {
 #'
 
 launch_con_pane <- function(con) {
-  stop_if_not(con$ping(), ~.x == 200, "Couldn't connect to the Server")
-  on_connection_opened(con = con, url = con$url, auth = con$auth)
+  stop_if_not(con$ping() , ~.x == TRUE,  "Couldn't connect to the Server")
+  on_connection_opened(con = con, url = con$url, auth = con$auth, db=con$db)
 }
-# launch_con_pane(con)
+#launch_con_pane(con)
