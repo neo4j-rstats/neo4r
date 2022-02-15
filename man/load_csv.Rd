@@ -4,10 +4,18 @@
 \alias{load_csv}
 \title{Load a CSV to Neo4J}
 \usage{
-load_csv(on_load = "", con, url, header = TRUE,
-  periodic_commit = 1000, as = "csv", type = c("row", "graph"),
-  output = c("r", "json"), include_stats = TRUE,
-  include_meta = FALSE)
+load_csv(
+  on_load = "",
+  con,
+  url,
+  header = TRUE,
+  periodic_commit = 1000,
+  as = "csv",
+  type = c("row", "graph"),
+  output = c("r", "json"),
+  include_stats = TRUE,
+  include_meta = FALSE
+)
 }
 \arguments{
 \item{on_load}{the code to execute on load}
@@ -26,9 +34,9 @@ load_csv(on_load = "", con, url, header = TRUE,
 
 \item{output}{Use "json" if you want the output to be printed as JSON}
 
-\item{include_stats}{tShould the stats about the transaction be included?}
+\item{include_stats}{Should the stats about the transaction be included?}
 
-\item{include_meta}{tShould the stats about the transaction be included?}
+\item{include_meta}{Should the stats about the transaction be included?}
 }
 \value{
 a csv loaded to Neo4J

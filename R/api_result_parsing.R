@@ -26,38 +26,57 @@ parse_row <- function(
   include_stats,
   stats,
   meta,
-  res_meta
+  res_meta,
+  format
 ){
-  # Type = row
-  # Special case for handling arrays
-  # browser()
-  res <- attempt::attempt({
-    purrr::map_depth(res_data, 3, tibble::as_tibble) %>%
-      purrr::map(purrr::flatten) %>%
-      purrr::transpose() %>%
-      purrr::map(rbindlist_to_tibble)
-  }, silent = TRUE)
-  if (class(res)[1] == "try-error") {
-    res <- flatten(res_data) %>%
-      purrr::map_dfr(purrr::flatten_dfc) %>%
-      list()
-  }
-  if (length(res_data) != 0){
-    res <- res %>%
-      setNames(res_names)
-  }
+  if (format == "std") {
+    # Type = row
+    # Special case for handling arrays
+    # browser()
+    res <- attempt::attempt({
+      purrr::map_depth(res_data, 3, tibble::as_tibble) %>%
+        purrr::map(purrr::flatten) %>%
+        purrr::transpose() %>%
+        purrr::map(rbindlist_to_tibble)
+    }, silent = TRUE)
+    if (class(res)[1] == "try-error") {
+      res <- flatten(res_data) %>%
+        purrr::map_dfr(purrr::flatten_dfc) %>%
+        list()
+    }
+    if (length(res_data) != 0){
+      res <- res %>%
+        setNames(res_names)
+    }
 
-  if (include_stats) {
-    res <- c(res, list(stats = stats))
-  } else {
+    if (include_stats) {
+      res <- c(res, list(stats = stats))
+    } else {
+      class(res) <- c("neo", class(res))
+    }
+
+    if (meta) {
+      res <- c(res, res_meta)
+    }
     class(res) <- c("neo", class(res))
-  }
+    return(res)
 
-  if (meta) {
-    res <- c(res, res_meta)
+  } else if (format == "table") {
+
+    res <- res_data %>% purrr::map("row")
+    res <- res %>% map(magrittr::set_names, res_names) %>% map_dfr(as_tibble)
+    res <- list(results = res)
+
+    if (include_stats) {
+      res <- c(res, list(stats = stats))
+    }
+
+    if (meta) {
+      res <- c(res, res_meta)
+    }
+
+    return(res)
   }
-  class(res) <- unique(c("neo", class(res)))
-  return(res)
 }
 
 parse_graph <- function(
@@ -137,10 +156,21 @@ parse_graph <- function(
 
 #' @importFrom httr content
 #' @importFrom attempt stop_if
-#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr  compact flatten_dfr vec_depth
+#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr compact flatten_dfr vec_depth map_dfr
 #' @importFrom tidyr gather
 #' @importFrom stats setNames
 #' @importFrom tibble tibble
+
+replaceInList <- function (x, FUN, ...)
+{
+  if (is.list(x)) {
+    for (i in seq_along(x)) {
+      x[i] <- list(replaceInList(x[[i]], FUN, ...))
+    }
+    x
+  }
+  else FUN(x, ...)
+}
 
 parse_api_results <- function(res, type, include_stats, meta, format) {
 
@@ -153,8 +183,18 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
   # Get the result element
   results <- api_content$results[[1]]
 
-  # Turn NULL to NA
-  results <- null_to_na(results)
+  # turn the null to NA
+  # results <- modify_depth(
+  #   results, vec_depth(results) - 1, function(x){
+  #     if (is.null(x)){
+  #       NA
+  #     } else {
+  #       x
+  #     }
+  #   }, .ragged = TRUE
+  # )
+
+  results <- replaceInList(results, function(x) if(is.null(x)) NA else x)
 
   # Get the stats (if any)
   if (!is.null(results$stats)) {
@@ -189,6 +229,7 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
     x
   })
 
+
   if (type == "row") {
     return(
       parse_row(
@@ -197,7 +238,8 @@ parse_api_results <- function(res, type, include_stats, meta, format) {
         include_stats,
         stats,
         meta,
-        res_meta
+        res_meta,
+        format
       )
     )
   } else if (type == "graph") {

@@ -7,13 +7,14 @@ clean_query <- function(query) {
 
 #' @importFrom jsonlite toJSON
 
-to_json_neo <- function(query, include_stats, meta, type) {
+to_json_neo <- function(query, include_stats, meta, type, params) {
   toJSON(
     list(
       statement = query,
       includeStats = include_stats,
       meta = meta,
-      resultDataContents = list(type)
+      resultDataContents = list(type),
+      parameters = params
     ),
     auto_unbox = TRUE
   )
@@ -25,8 +26,10 @@ to_json_neo <- function(query, include_stats, meta, type) {
 #' @param con A NEO4JAPI connection object
 #' @param type Return the result as row or as graph
 #' @param output Use "json" if you want the output to be printed as JSON
-#' @param include_stats tShould the stats about the transaction be included?
-#' @param include_meta tShould the stats about the transaction be included?
+#' @param include_stats Should the stats about the transaction be included?
+#' @param include_meta Should the stats about the transaction be included?
+#' @param format Format of the output
+#' @param params Parameters to pass along the query
 #'
 #' @importFrom glue glue
 #' @importFrom attempt stop_if_not
@@ -37,9 +40,11 @@ to_json_neo <- function(query, include_stats, meta, type) {
 
 call_neo4j <- function(query, con,
                        type = c("row", "graph"),
-                       output = c("r", "json"),
+                       output = c("r", "json", "raw"),
                        include_stats = FALSE,
-                       include_meta = FALSE) {
+                       include_meta = FALSE,
+                       format = c("std", "table"),
+                       params = NULL) {
   # browser()
   stop_if_not(
     con, ~"Neo4JAPI" %in% class(.x),
@@ -47,14 +52,14 @@ call_neo4j <- function(query, con,
   )
   # Ensure the inputs are the one we expect
   output <- match.arg(output)
-  # format <- match.arg(format)
+  format <- match.arg(format)
   type <- match.arg(type)
 
   # Clean the query to prevent weird mess up with " and stuffs
   query_clean <- clean_query(query)
 
   # Transform the query to a Neo4J JSON format
-  query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type)
+  query_jsonised <- to_json_neo(query_clean, include_stats, include_meta, type, params)
   # Unfortunately I was not able to programmatically convert everything to JSON
   body <- glue('{"statements" : [ %query_jsonised% ]}', .open = "%", .close = "%")
 
@@ -77,6 +82,8 @@ call_neo4j <- function(query, con,
   # Return the parsed output, to json or to R
   if (output == "json") {
     toJSON(lapply(content(res)$results, function(x) x$data), pretty = TRUE)
+  } else if (output == "raw") {
+   content(res)
   } else {
     parse_api_results(
       res = res,
