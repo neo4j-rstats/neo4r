@@ -40,9 +40,9 @@ to_json_neo <- function(query, include_stats, meta, type, params) {
 call_neo4j <- function(query, con,
                        type = c("row", "graph"),
                        output = c("r", "json", "raw"),
-                       format = c("std", "table"),
                        include_stats = FALSE,
                        include_meta = FALSE,
+                       format = c("std", "table"),
                        params = NULL) {
   # browser()
   stop_if_not(
