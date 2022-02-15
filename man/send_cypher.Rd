@@ -4,8 +4,14 @@
 \alias{send_cypher}
 \title{Send a cypher file to be executed}
 \usage{
-send_cypher(path, con, type = c("row", "graph"), output = c("r",
-  "json"), include_stats = TRUE, meta = FALSE)
+send_cypher(
+  path,
+  con,
+  type = c("row", "graph"),
+  output = c("r", "json"),
+  include_stats = TRUE,
+  meta = FALSE
+)
 }
 \arguments{
 \item{path}{the path to the cypher file}

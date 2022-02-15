@@ -64,7 +64,7 @@ parse_row <- function(
   } else if (format == "table") {
 
     res <- res_data %>% purrr::map("row")
-    res <- res %>% map(magrittr::set_names, res_names) %>% map(as_tibble) %>% bind_rows()
+    res <- res %>% map(magrittr::set_names, res_names) %>% map_dfr(as_tibble)
     res <- list(results = res)
 
     if (include_stats) {
@@ -156,7 +156,7 @@ parse_graph <- function(
 
 #' @importFrom httr content
 #' @importFrom attempt stop_if
-#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr  compact flatten_dfr vec_depth
+#' @importFrom purrr flatten transpose modify_depth map map_df as_vector map_chr compact flatten_dfr vec_depth map_dfr
 #' @importFrom tidyr gather
 #' @importFrom stats setNames
 #' @importFrom tibble tibble

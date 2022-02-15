@@ -26,8 +26,9 @@ to_json_neo <- function(query, include_stats, meta, type, params) {
 #' @param con A NEO4JAPI connection object
 #' @param type Return the result as row or as graph
 #' @param output Use "json" if you want the output to be printed as JSON
-#' @param include_stats tShould the stats about the transaction be included?
-#' @param include_meta tShould the stats about the transaction be included?
+#' @param include_stats Should the stats about the transaction be included?
+#' @param include_meta Should the stats about the transaction be included?
+#' @param format Format of the output
 #' @param params Parameters to pass along the query
 #'
 #' @importFrom glue glue
